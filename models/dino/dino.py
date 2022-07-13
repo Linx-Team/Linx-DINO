@@ -34,7 +34,9 @@ from .deformable_transformer import build_deformable_transformer
 from .utils import sigmoid_focal_loss, MLP
 
 from ..registry import MODULE_BUILD_FUNCS
-from .dn_components import prepare_for_cdn,dn_post_process
+from .dn_components import prepare_for_cdn,dn_post_process, cuda
+
+
 class DINO(nn.Module):
     """ This is the Cross-Attention Detector module that performs object detection """
     def __init__(self, backbone, transformer, num_classes, num_queries, 
@@ -522,13 +524,13 @@ class SetCriterion(nn.Module):
             dn_neg_idx = []
             for i in range(len(targets)):
                 if len(targets[i]['labels']) > 0:
-                    t = torch.range(0, len(targets[i]['labels']) - 1).long().cuda()
+                    t = cuda(torch.range(0, len(targets[i]['labels']) - 1).long())
                     t = t.unsqueeze(0).repeat(scalar, 1)
                     tgt_idx = t.flatten()
-                    output_idx = (torch.tensor(range(scalar)) * single_pad).long().cuda().unsqueeze(1) + t
+                    output_idx = cuda((torch.tensor(range(scalar)) * single_pad).long()).unsqueeze(1) + t
                     output_idx = output_idx.flatten()
                 else:
-                    output_idx = tgt_idx = torch.tensor([]).long().cuda()
+                    output_idx = tgt_idx = cuda(torch.tensor([]).long())
 
                 dn_pos_idx.append((output_idx, tgt_idx))
                 dn_neg_idx.append((output_idx + single_pad // 2, tgt_idx))
@@ -546,12 +548,12 @@ class SetCriterion(nn.Module):
             losses.update(l_dict)
         else:
             l_dict = dict()
-            l_dict['loss_bbox_dn'] = torch.as_tensor(0.).to('cuda')
-            l_dict['loss_giou_dn'] = torch.as_tensor(0.).to('cuda')
-            l_dict['loss_ce_dn'] = torch.as_tensor(0.).to('cuda')
-            l_dict['loss_xy_dn'] = torch.as_tensor(0.).to('cuda')
-            l_dict['loss_hw_dn'] = torch.as_tensor(0.).to('cuda')
-            l_dict['cardinality_error_dn'] = torch.as_tensor(0.).to('cuda')
+            l_dict['loss_bbox_dn'] = cuda(torch.as_tensor(0.))
+            l_dict['loss_giou_dn'] = cuda(torch.as_tensor(0.))
+            l_dict['loss_ce_dn'] = cuda(torch.as_tensor(0.))
+            l_dict['loss_xy_dn'] = cuda(torch.as_tensor(0.))
+            l_dict['loss_hw_dn'] = cuda(torch.as_tensor(0.))
+            l_dict['cardinality_error_dn'] = cuda(torch.as_tensor(0.))
             losses.update(l_dict)
 
 
@@ -591,12 +593,12 @@ class SetCriterion(nn.Module):
                     losses.update(l_dict)
                 else:
                     l_dict = dict()
-                    l_dict['loss_bbox_dn']=torch.as_tensor(0.).to('cuda')
-                    l_dict['loss_giou_dn']=torch.as_tensor(0.).to('cuda')
-                    l_dict['loss_ce_dn']=torch.as_tensor(0.).to('cuda')
-                    l_dict['loss_xy_dn'] = torch.as_tensor(0.).to('cuda')
-                    l_dict['loss_hw_dn'] = torch.as_tensor(0.).to('cuda')
-                    l_dict['cardinality_error_dn'] = torch.as_tensor(0.).to('cuda')
+                    l_dict['loss_bbox_dn']= cuda(torch.as_tensor(0.))
+                    l_dict['loss_giou_dn']=cuda(torch.as_tensor(0.))
+                    l_dict['loss_ce_dn']=cuda(torch.as_tensor(0.))
+                    l_dict['loss_xy_dn'] = cuda(torch.as_tensor(0.))
+                    l_dict['loss_hw_dn'] = cuda(torch.as_tensor(0.))
+                    l_dict['cardinality_error_dn'] = cuda(torch.as_tensor(0.))
                     l_dict = {k + f'_{idx}': v for k, v in l_dict.items()}
                     losses.update(l_dict)
 
