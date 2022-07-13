@@ -50,7 +50,7 @@ def get_args_parser():
 
 
     # training parameters
-    parser.add_argument('--output_dir', default='',
+    parser.add_argument('--output_dir', default='logs/dino/R50',
                         help='path where to save, empty for no saving')
     parser.add_argument('--note', default='',
                         help='add some notes to the experiment')
@@ -63,7 +63,7 @@ def get_args_parser():
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     parser.add_argument('--eval', action='store_true')
-    parser.add_argument('--num_workers', default=1, type=int)
+    parser.add_argument('--num_workers', default=10, type=int)
     parser.add_argument('--test', action='store_true')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--find_unused_params', action='store_true')
