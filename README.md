@@ -95,7 +95,7 @@ python main.py -m dn_dab_deformable_detr \
               --device cpu
 ```
 
-This implementation is optimized version of DINO "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)" - the current SOTA model of object detection
+This implementation is variation of DINO "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)" - the current SOTA model of object detection
 
 
 ## LICNESE
