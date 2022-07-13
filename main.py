@@ -29,6 +29,7 @@ from engine import evaluate, train_one_epoch, test
 import models
 from util.slconfig import DictAction, SLConfig
 from util.utils import ModelEma, BestMetricHolder
+from torch.utils.tensorboard import SummaryWriter
 
 
 def get_args_parser():
@@ -42,7 +43,7 @@ def get_args_parser():
 
     # dataset parameters
     parser.add_argument('--dataset_file', default='coco')
-    parser.add_argument('--coco_path', type=str, default='/comp_robot/cv_public_dataset/COCO2017/')
+    parser.add_argument('--coco_path', type=str, default='~/.linx/datasets/coco_2017')
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
     parser.add_argument('--fix_size', action='store_true')
@@ -62,7 +63,7 @@ def get_args_parser():
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     parser.add_argument('--eval', action='store_true')
-    parser.add_argument('--num_workers', default=10, type=int)
+    parser.add_argument('--num_workers', default=1, type=int)
     parser.add_argument('--test', action='store_true')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--find_unused_params', action='store_true')
@@ -273,6 +274,10 @@ def main(args):
 
         return
 
+    writer = None
+    if utils.is_main_process():
+        writer = SummaryWriter(str(output_dir / 'tensorboard'))
+
     print("Start training")
     start_time = time.time()
     best_map_holder = BestMetricHolder(use_ema=args.use_ema)
@@ -323,6 +328,24 @@ def main(args):
                 'epoch': epoch,
                 'args': args,
             }, checkpoint_path)
+
+            # write test status
+        if utils.is_main_process():
+            writer.add_scalar('test/AP', test_stats['coco_eval_bbox'][0], epoch)
+            writer.add_scalar('test/AP50', test_stats['coco_eval_bbox'][1], epoch)
+            writer.add_scalar('test/AP75', test_stats['coco_eval_bbox'][2], epoch)
+            writer.add_scalar('test/APs', test_stats['coco_eval_bbox'][3], epoch)
+            writer.add_scalar('test/APm', test_stats['coco_eval_bbox'][4], epoch)
+            writer.add_scalar('test/APl', test_stats['coco_eval_bbox'][5], epoch)
+            writer.add_scalar('test/class_error', test_stats['class_error'], epoch)
+            writer.add_scalar('test/loss', test_stats['loss'], epoch)
+            writer.add_scalar('test/loss_ce', test_stats['loss_ce'], epoch)
+            writer.add_scalar('test/loss_bbox', test_stats['loss_bbox'], epoch)
+            writer.add_scalar('test/loss_giou', test_stats['loss_giou'], epoch)
+            for key, value in test_stats.items():
+                if "corr" in key:
+                    writer.add_scalar('test/' + key, value, epoch)
+
         log_stats = {
             **{f'train_{k}': v for k, v in train_stats.items()},
             **{f'test_{k}': v for k, v in test_stats.items()},
