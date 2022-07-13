@@ -18,8 +18,10 @@ conda activate linx
 - with GPU (for details, see https://pytorch.org)
 
 ```bash
-# CUDA 11.3
-conda install pytorch==1.9.1 torchvision==0.10.1 torchaudio==0.9.1 cudatoolkit=11.3 -c pytorch
+# CUDA 11.1
+# cuda 11.1 version에 대해서는 문제가 있어 아래 명령으로 변경
+# conda install pytorch==1.9.1 torchvision==0.10.1 torchaudio==0.9.1 cudatoolkit=10.2 -c pytorch
+pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 - with CPU (for details, see https://pytorch.org)
