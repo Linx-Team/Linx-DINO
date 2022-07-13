@@ -1,173 +1,73 @@
-# DINO <img src="figs/dinosaur.png" width="30">
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/dino-detr-with-improved-denoising-anchor-1/object-detection-on-coco-minival)](https://paperswithcode.com/sota/object-detection-on-coco-minival?p=dino-detr-with-improved-denoising-anchor-1)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/dino-detr-with-improved-denoising-anchor-1/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=dino-detr-with-improved-denoising-anchor-1)
+# Project - Linx
 
-This is the official implementation of the paper "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)". 
-(DINO pronounced `daɪnoʊ' as in dinosaur)
+preparing for object detection challenge
 
-Authors: [Hao Zhang](https://scholar.google.com/citations?user=B8hPxMQAAAAJ&hl=zh-CN)\*, [Feng Li](https://fengli-ust.github.io/)\*, [Shilong Liu](https://www.lsl.zone/)\*, [Lei Zhang](https://www.leizhang.org/), [Hang Su](https://www.suhangss.me/), [Jun Zhu](https://ml.cs.tsinghua.edu.cn/~jun/index.shtml), [Lionel M. Ni](https://www.cse.ust.hk/~ni/), [Heung-Yeung Shum](https://scholar.google.com.hk/citations?user=9akH-n8AAAAJ&hl=en)
+![Linx eye](https://user-images.githubusercontent.com/15726007/177371786-167eb74b-3953-435a-9aa2-d1bb779f1688.png)
 
-# News
-[2022/7/10]: We released the code and checkpoints with Resnet-50 backbone. </br>
-[2022/6/7]: We release a unified detection and segmentation model [Mask DINO](https://arxiv.org/pdf/2206.02777.pdf) that achieves the best results on all the three segmentation tasks (**54.7** AP on [COCO instance leaderboard](https://paperswithcode.com/sota/instance-segmentation-on-coco), **59.5** PQ on [COCO panoptic leaderboard](https://paperswithcode.com/sota/panoptic-segmentation-on-coco-test-dev), and **60.8** mIoU on [ADE20K semantic leaderboard](https://paperswithcode.com/sota/semantic-segmentation-on-ade20k))! Code will be available [here](https://github.com/IDEACVR/MaskDINO).
-</br>
-[2022/5/28] Code for [DN-DETR](https://arxiv.org/pdf/2203.01305.pdf) is available [here](https://github.com/IDEA-opensource/DN-DETR).
-</br>
-[2020/4/10]: Code for [DAB-DETR](https://arxiv.org/abs/2201.12329) is avaliable [here](https://github.com/SlongLiu/DAB-DETR).
-</br>
-[2022/3/8]: We reach the SOTA on [MS-COCO leader board](https://paperswithcode.com/sota/object-detection-on-coco) with **63.3AP**!
-</br>
-[2022/3/9]: We build a repo [Awesome Detection Transformer](https://github.com/IDEACVR/awesome-detection-transformer) to present papers about transformer for detection and segmenttion. Welcome to your attention!
+# Installation
 
-![SOTA results](figs/sota.jpg "results on MSCOCO")
-# Introduction
-We present **DINO** (**D**ETR with **I**mproved de**N**oising anch**O**r
-boxes) with:
+## 1. Create Conda Environment
 
-1. **State-of-the-art & end-to-end**: DINO achieves **63.2** AP on COCO Val and **63.3** AP on COCO test-dev with more than ten times smaller model size and data size than previous best models.
-2. **Fast-converging**: With the ResNet-50 backbone, DINO with 5 scales achieves  **49.4** AP in 12 epochs and **51.3** AP in 24 epochs. Our 4-scale model achieves similar performance and runs at 23 FPS.
-
-
-
-# Methods
-![method](figs/framework.png "model arch")
-
-
-## Model Zoo
-We have put our model checkpoints here [[model zoo in Google Drive]](https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing)[[model zoo in 百度网盘]](https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ)（提取码"DINO"), where checkpoint{x}_{y}scale.pth denotes the checkpoint of y-scale model trained for x epochs.
-
-### 12 epoch setting
-<table>
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>name</th>
-      <th>backbone</th>
-      <th>box AP</th>
-      <th>Checkpoint</th>
-      <th>Where in <a href="https://arxiv.org/abs/2203.03605">Our Paper</a></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>1</th>
-      <td>DINO-4scale</td>
-      <td>R50</td>
-      <td>49.0</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp</td>
-      <td>Table 1</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>DINO-5scale</td>
-      <td>R50</td>
-      <td>49.4</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp;</td>
-      <td>Table 1</td>
-    </tr>
-  </tbody>
-</table>
-
-### 24 epoch setting
-<table>
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>name</th>
-      <th>backbone</th>
-      <th>box AP</th>
-      <th>Checkpoint</th>
-      <th>Where in <a href="https://arxiv.org/abs/2203.03605">Our Paper</a></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>1</th>
-      <td>DINO-4scale</td>
-      <td>R50</td>
-      <td>50.4</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp</td>
-      <td>Table 2</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>DINO-5scale</td>
-      <td>R50</td>
-      <td>51.3</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp;</td>
-      <td>Table 2</td>
-    </tr>
-  </tbody>
-</table>
-
-### 36 epoch setting
-<table>
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>name</th>
-      <th>backbone</th>
-      <th>box AP</th>
-      <th>Checkpoint</th>
-      <th>Where in <a href="https://arxiv.org/abs/2203.03605">Our Paper</a></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>1</th>
-      <td>DINO-4scale</td>
-      <td>R50</td>
-      <td>50.9</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp</td>
-      <td>Table 2</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>DINO-5scale</td>
-      <td>R50</td>
-      <td>51.2</td>
-      <td><a href="https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing">Google Drive</a>&nbsp/&nbsp<a href="https://pan.baidu.com/s/1St5rvfgfPwpnPuf_Oe6DpQ">BaiDu</a>&nbsp;</td>
-      <td>Table 2</td>
-    </tr>
-  </tbody>
-</table>
-
-## Installation
-We use the environment same to DAB-DETR and DN-DETR to run DINO. If you have run DN-DETR or DAB-DETR, you can skip this step.
-We test our models under ```python=3.7.3,pytorch=1.9.0,cuda=11.1```. Other versions might be available as well.
-
-1. Clone this repo
-```sh
-git https://github.com/IDEACVR/DINO
-cd DINO
+```bash
+conda create --name linx python=3.8 -y
+conda activate linx
 ```
 
-2. Install Pytorch and torchvision
+## 2. Install PyTorch
 
-Follow the instruction on https://pytorch.org/get-started/locally/.
-```sh
-# an example:
-conda install -c pytorch pytorch torchvision
+- with GPU (for details, see https://pytorch.org)
+
+```bash
+# CUDA 10.2
+conda install pytorch==1.9.1 torchvision==0.10.1 torchaudio==0.9.1 cudatoolkit=10.2 -c pytorch
 ```
 
-3. Install other needed packages
-```sh
+- with CPU (for details, see https://pytorch.org)
+
+```bash
+# conda
+conda install pytorch==1.9.1 torchvision==0.10.1 torchaudio==0.9.1 -c pytorch
+```
+
+## 3. Install MS coco api
+```bash
+git clone https://github.com/cocodataset/cocoapi
+cd cocoapi
+cd PythonAPI
+make
+python setup.py install
+pip show pycocotools # v 2.0 설치 확인 
+```
+
+
+## 4. Install requirements
+```bash
 pip install -r requirements.txt
 ```
 
-4. Compiling CUDA operators
-```sh
-cd models/dino/ops
-python setup.py build install
-# unit test (should see all checking is True)
-python test.py
-cd ../../..
+## 5. Setup coco dataset 
+- download [COCO 2017](https://cocodataset.org/) dataset 
+```bash
+wget http://images.cocodataset.org/zips/train2017.zip
+wget http://images.cocodataset.org/zips/val2017.zip
+wget http://images.cocodataset.org/zips/test2017.zip
+
+unzip train2017.zip
+unzip val2017.zip
+unzip test2017.zip
+
+wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+wget http://images.cocodataset.org/annotations/stuff_annotations_trainval2017.zip
+wget http://images.cocodataset.org/annotations/image_info_test2017.zip
+
+unzip annotations_trainval2017.zip
+unzip stuff_annotations_trainval2017.zip
+unzip image_info_test2017.zip
 ```
 
-## Data
-Please download [COCO 2017](https://cocodataset.org/) dataset and organize them as following:
+- organize them as following:
 ```
-COCODIR/
+COCO_DIR/
   ├── train2017/
   ├── val2017/
   └── annotations/
@@ -175,60 +75,28 @@ COCODIR/
   	└── instances_val2017.json
 ```
 
-
-## Run
-We use DINO 4-scale model trained for 12 epochs as an example to demonstrate how to evaluate and train our model.
-
-### Eval our pretrianed model
-Download our DINO model checkpoint "checkpoint0011_4scale.pth" from [this link](https://drive.google.com/drive/folders/1qD5m1NmK0kjE5hh-G17XUX751WsEG-h_?usp=sharing) and perform the command below. You can expect to get the final AP about 49.0.
+## 6. Compiling CUDA operators
 ```sh
-bash scripts/DINO_eval.sh /path/to/your/COCODIR /path/to/your/checkpoint
+cd models/dn_dab_deformable_detr/ops
+python setup.py build install
+# unit test (should see all checking is True)
+python test.py
+cd ../../..
 ```
-### Train the 4scale model for 12 epochs
-You can also train our model on a single process:
+
+## 7. Run(Debug)
 ```sh
-bash scripts/DINO_train.sh /path/to/your/COCODIR
+python main.py -m dn_dab_deformable_detr \
+              --output_dir logs/dn_dab_deformable_detr/R50 \
+              --batch_size 1 \
+              --coco_path ~/.linx/datasets/coco_2017 \
+              --transformer_activation relu \
+              --use_dn \
+              --device cpu
 ```
-### Distributed Run
-However, as the training is time consuming, we suggest to train the model on multi-device.
 
-If you plan to train the models on a cluster with Slurm, here is an example command for training:
-```sh
-# for DINO-4scale: 49.0
-bash scripts/DINO_train_submitit.sh /path/to/your/COCODIR
+This implementation is optimized version of DINO "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)" - the current SOTA model of object detection
 
-# for DINO-5scale: 49.4
-bash scripts/DINO_train_submitit_5scale.sh /path/to/your/COCODIR
-```
-Notes:
-The results are sensitive to the batch size. We use 16(2 images each GPU x 8 GPUs for DINO-4scale and 1 images each GPU x 16 GPUs for DINO-5scale) by default.
-
-Or run with multi-processes on a single node:
-```sh
-# for DINO-4scale: 49.0
-bash scripts/DINO_train_dist.sh /path/to/your/COCODIR
-```
-# Links
-Our model is based on [DAB-DETR](https://arxiv.org/abs/2201.12329) and [DN-DETR](https://arxiv.org/abs/2203.01305).
-<p>
-<font size=3><b>DN-DETR: Accelerate DETR Training by Introducing Query DeNoising.</b></font>
-<br>
-<font size=2>Feng Li*, Hao Zhang*, Shilong Liu, Jian Guo, Lionel M. Ni, Lei Zhang.</font>
-<br>
-<font size=2>IEEE Conference on Computer Vision and Pattern Recognition (<b>CVPR</b>) 2022.</font>
-<br>
-<a href='https://arxiv.org/abs/2203.01305'>[paper]</a> <a href='https://github.com/FengLi-ust/DN-DETR'>[code]</a> <a href='https://www.zhihu.com/question/517340666/answer/2381304399'>[中文解读]</a>
-</p>
-
-<p>
-<font size=3><b>DAB-DETR: Dynamic Anchor Boxes are Better Queries for DETR.</b></font>
-<br>
-<font size=2>Shilong Liu, Feng Li, Hao Zhang, Xiao Yang, Xianbiao Qi, Hang Su, Jun Zhu, Lei Zhang.</font>
-<br>
-<font size=2>International Conference on Learning Representations (<b>ICLR</b>) 2022.</font>
-<br>
-<a href='https://arxiv.org/abs/2201.12329'>[paper]</a> <a href='https://github.com/SlongLiu/DAB-DETR'>[code]</a>    
-</p>
 
 ## LICNESE
 DINO is released under the Apache 2.0 license. Please see the [LICENSE](LICNESE) file for more information.
