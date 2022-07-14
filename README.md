@@ -77,24 +77,37 @@ COCO_DIR/
   	└── instances_val2017.json
 ```
 
-## 6. Compiling CUDA operators
+## 6. Setup backbone pretrained models
+- case: swin transformer
+```bash
+wget -c https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window12_384_22k.pth
+```
+- move the downloade weight file in the backbone directory as following
+```
+BACKBONE_DIR/
+  └── swin
+```
+
+## 7. Compiling CUDA operators
 ```sh
-cd models/dn_dab_deformable_detr/ops
+cd models/dino/ops
 python setup.py build install
 # unit test (should see all checking is True)
 python test.py
 cd ../../..
 ```
 
-## 7. Run(Debug)
+## 8. Run(Debug) 
+- scrips/ directory 참조
 ```sh
-python main.py -m dn_dab_deformable_detr \
-              --output_dir logs/dn_dab_deformable_detr/R50 \
-              --batch_size 1 \
-              --coco_path ~/.linx/datasets/coco_2017 \
-              --transformer_activation relu \
-              --use_dn \
-              --device cpu
+python -m torch.distributed.launch --nproc_per_node=4 \ #mproc 갯수는 사용가능한 cuda device 숫자보다 작게
+    main.py \
+	--output_dir logs/dino/swin \
+	-c config/DINO/DINO_4scale_swin.py \ 
+	--coco_path  /Path/to/COCO_DIR \
+	--options dn_scalar=100 embed_init_tgt=TRUE \
+	dn_label_coef=1.0 dn_bbox_coef=1.0 use_ema=False \
+	dn_box_noise_scale=1.0 backbone_dir=/Path/To/BACKBONE_DIR
 ```
 
 This implementation is variation of DINO "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)" - the current SOTA model of object detection
