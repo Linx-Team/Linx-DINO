@@ -103,6 +103,7 @@ cd ../../..
 ## 8. Run(Debug) 
 - scrips/ directory 참조
 ```sh
+# main.py 단독 - config 수정 이후  - scripts/ 참조
 #distributed를 사용하는 경우 - mproc 갯수는 사용가능한 cuda device 숫자보다 작게, 
 python -m torch.distributed.launch --nproc_per_node=4 main.py --output_dir logs/dino/swin -c config/DINO/DINO_4scale_swin.py --coco_path /home/ubuntu/.linx/datasets/coco_2017 --options dn_scalar=100 embed_init_tgt=TRUE dn_label_coef=1.0 dn_bbox_coef=1.0 use_ema=False dn_box_noise_scale=1.0 backbone_dir=/home/ubuntu/.linx/backbones/swin
 ```

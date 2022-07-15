@@ -11,3 +11,4 @@ seaborn
 tqdm
 tensorboard
 albumentations
+setuptools==59.5.0 #BUGFIX
