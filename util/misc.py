@@ -4,6 +4,7 @@ Misc functions, including distributed helpers.
 
 Mostly copy-paste from torchvision references.
 """
+import logging
 import os
 import random 
 import subprocess
@@ -203,7 +204,8 @@ class MetricLogger(object):
 
     def log_every(self, iterable, print_freq, header=None, logger=None):
         if logger is None:
-            print_func = print
+            logger = logging.getLogger() # default logger
+            print_func = logger.info
         else:
             print_func = logger.info
 
