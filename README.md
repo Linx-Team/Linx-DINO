@@ -6,6 +6,12 @@ preparing for object detection challenge
 
 # Installation
 
+## 0. Clone this project
+```bash
+git clone https://github.com/Linx-Team/Linx-DINO.git
+cd Linx-DINO
+```
+
 ## 1. Create Conda Environment
 
 ```bash
@@ -31,7 +37,12 @@ pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f ht
 conda install pytorch==1.9.1 torchvision==0.10.1 torchaudio==0.9.1 -c pytorch
 ```
 
-## 3. Install MS coco api
+## 3. Install requirements
+```bash
+pip install -r requirements.txt
+```
+
+## 4. Install MS coco api
 ```bash
 git clone https://github.com/cocodataset/cocoapi
 cd cocoapi
@@ -41,22 +52,14 @@ python setup.py install
 pip show pycocotools # v 2.0 설치 확인 
 ```
 
-
-## 4. Install requirements
-```bash
-pip install -r requirements.txt
-```
-
 ## 5. Setup coco dataset 
 - download [COCO 2017](https://cocodataset.org/) dataset 
 ```bash
 wget http://images.cocodataset.org/zips/train2017.zip
 wget http://images.cocodataset.org/zips/val2017.zip
-wget http://images.cocodataset.org/zips/test2017.zip
 
-unzip train2017.zip
-unzip val2017.zip
-unzip test2017.zip
+unzip -qq train2017.zip
+unzip -qq val2017.zip
 
 wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 wget http://images.cocodataset.org/annotations/stuff_annotations_trainval2017.zip
