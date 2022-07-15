@@ -11,3 +11,4 @@ pandas
 seaborn
 tqdm
 tensorboard
+albumentations
