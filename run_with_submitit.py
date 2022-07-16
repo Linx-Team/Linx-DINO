@@ -31,11 +31,11 @@ def parse_args():
 
 
 def get_shared_folder() -> Path:
-    # user = os.getenv("HOME")
-    project_home = Path('/home/ubuntu/workspace/Linx-DINO/')
+    home = Path(os.getenv("HOME"))
+    project_home = home / '.linx'
     # if Path("logs/checkpoints/").is_dir():
     #     p = Path(f"logs/checkpoints/experiments")
-    checkpoint_dir = project_home / 'logs/checkpoints'
+    checkpoint_dir = project_home / 'checkpoints'
     if checkpoint_dir.is_dir():
         p = checkpoint_dir / 'experiments'
         p.mkdir(exist_ok=True)
