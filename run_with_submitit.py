@@ -31,9 +31,13 @@ def parse_args():
 
 
 def get_shared_folder() -> Path:
-    user = os.getenv("USER")
-    if Path("logs/checkpoints/").is_dir():
-        p = Path(f"logs/checkpoints/experiments")
+    # user = os.getenv("HOME")
+    project_home = Path('/home/ubuntu/workspace/Linx-DINO/')
+    # if Path("logs/checkpoints/").is_dir():
+    #     p = Path(f"logs/checkpoints/experiments")
+    checkpoint_dir = project_home / 'logs/checkpoints'
+    if checkpoint_dir.is_dir():
+        p = checkpoint_dir / 'experiments'
         p.mkdir(exist_ok=True)
         return p
     raise RuntimeError("No shared folder available")
