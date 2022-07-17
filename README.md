@@ -122,13 +122,22 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 # Bibtex
 If you find our work helpful for your research, please consider citing the following BibTeX entry.   
-```
-@misc{zhang2022dino,
-      title={DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection}, 
-      author={Hao Zhang and Feng Li and Shilong Liu and Lei Zhang and Hang Su and Jun Zhu and Lionel M. Ni and Heung-Yeung Shum},
+```bibtex
+
+@inproceedings{li2022dn,
+      title={Dn-detr: Accelerate detr training by introducing query denoising},
+      author={Li, Feng and Zhang, Hao and Liu, Shilong and Guo, Jian and Ni, Lionel M and Zhang, Lei},
+      booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+      pages={13619--13627},
+      year={2022}
+}
+
+@inproceedings{
+      liu2022dabdetr,
+      title={{DAB}-{DETR}: Dynamic Anchor Boxes are Better Queries for {DETR}},
+      author={Shilong Liu and Feng Li and Hao Zhang and Xiao Yang and Xianbiao Qi and Hang Su and Jun Zhu and Lei Zhang},
+      booktitle={International Conference on Learning Representations},
       year={2022},
-      eprint={2203.03605},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+      url={https://openreview.net/forum?id=oMI9PjOb9Jl}
 }
 ```
