@@ -107,6 +107,20 @@ cd ../../..
 #distributed를 사용하는 경우 - mproc 갯수는 사용가능한 cuda device 숫자보다 작게, 
 python -m torch.distributed.launch --nproc_per_node=4 main.py --output_dir logs/dino/swin -c config/DINO/DINO_4scale_swin.py --coco_path /home/ubuntu/.linx/datasets/coco_2017 --options dn_scalar=100 embed_init_tgt=TRUE dn_label_coef=1.0 dn_bbox_coef=1.0 use_ema=False dn_box_noise_scale=1.0 backbone_dir=/home/ubuntu/.linx/backbones/swin
 ```
+## 9. Fine tuning based on pretrained model
+- pretraining 후 weight로 자체 custom dataset에 fine tuning 
+- bbox부분은 state load, class 부분은 ignore
+- dn_labelbook_size 는 미리 label에 대한 nn.Embedding을 할당하므로 num_classes와 동일하거나 더 크게
+```sh
+python main.py \
+--pretrain_model_path /home/ubuntu/.linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth \
+--finetune_ignore label_enc.weight class_embed \
+--output_dir logs/dino/finetune-0721 \
+-c config/DINO/DINO_4scale_swin.py \
+--coco_path /home/ubuntu/.linx/datasets/linx_data \
+--save_log \
+--options num_classes=7 epochs=50 embed_init_tgt=TRUE dn_scalar=100 dn_label_coef=1.0 dn_bbox_coef=1.0 dn_labelbook_size=7 use_ema=False dn_box_noise_scale=1.0 backbone_dir=/home/ubuntu/.linx/backbones/swin/
+```
 
 This implementation is mainly from DINO "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)" - the current SOTA model of object detection
 
