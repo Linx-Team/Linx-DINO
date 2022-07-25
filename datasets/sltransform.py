@@ -231,34 +231,34 @@ class Albumentations:
             # bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']),
         )
 
-    # def __call__(self, img, target, p=1.0):
-    #     """
-    #     simpler - image transformation only
-    #     """
-    #     img_np = np.array(img)
-    #     if self.transform and random.random() < p:
-    #         new_res = self.transform(image=img_np)  # transformed
-    #         img_np = new_res['image']
-    #     img_new = Image.fromarray(img_np)
-    #
-    #     return img_new, target
-
     def __call__(self, img, target, p=1.0):
         """
-        Input:
-            target['boxes']: xyxy, unnormalized data.
-
+        simpler - image transformation only
         """
-        boxes_new = boxes_raw = target['boxes']
-        labels_new = labels_raw = target['labels']
         img_np = np.array(img)
         if self.transform and random.random() < p:
-            new_res = self.transform(image=img_np, bboxes=boxes_raw, class_labels=labels_raw)  # transformed
-            boxes_new = torch.Tensor(new_res['bboxes']).to(boxes_raw.dtype).reshape_as(boxes_raw)
+            new_res = self.transform(image=img_np)  # transformed
             img_np = new_res['image']
-            labels_new = torch.Tensor(new_res['class_labels']).to(labels_raw.dtype)
         img_new = Image.fromarray(img_np)
-        target['boxes'] = boxes_new
-        target['labels'] = labels_new
 
         return img_new, target
+
+    # def __call__(self, img, target, p=1.0):
+    #     """
+    #     Input:
+    #         target['boxes']: xyxy, unnormalized data.
+    #
+    #     """
+    #     boxes_new = boxes_raw = target['boxes']
+    #     labels_new = labels_raw = target['labels']
+    #     img_np = np.array(img)
+    #     if self.transform and random.random() < p:
+    #         new_res = self.transform(image=img_np, bboxes=boxes_raw, class_labels=labels_raw)  # transformed
+    #         boxes_new = torch.Tensor(new_res['bboxes']).to(boxes_raw.dtype).reshape_as(boxes_raw)
+    #         img_np = new_res['image']
+    #         labels_new = torch.Tensor(new_res['class_labels']).to(labels_raw.dtype)
+    #     img_new = Image.fromarray(img_np)
+    #     target['boxes'] = boxes_new
+    #     target['labels'] = labels_new
+    #
+    #     return img_new, target
