@@ -220,8 +220,9 @@ class Albumentations:
     def __init__(self):
         import albumentations as A
         self.transform = A.Compose([
-            A.Blur(blur_limit=11, p=0.1),
-            A.RGBShift(p=0.1),
+            # A.Blur(p=0.01),
+            A.MedianBlur(p=0.1),
+            A.ToGray(p=0.1),
             A.CLAHE(p=0.1),
             A.RandomBrightnessContrast(p=0.05),
             A.RandomGamma(p=0.1),
@@ -230,18 +231,6 @@ class Albumentations:
             ],
             # bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']),
         )
-
-    def __call__(self, img, target, p=1.0):
-        """
-        simpler - image transformation only
-        """
-        img_np = np.array(img)
-        if self.transform and random.random() < p:
-            new_res = self.transform(image=img_np)  # transformed
-            img_np = new_res['image']
-        img_new = Image.fromarray(img_np)
-
-        return img_new, target
 
     # def __call__(self, img, target, p=1.0):
     #     """
@@ -262,3 +251,16 @@ class Albumentations:
     #     target['labels'] = labels_new
     #
     #     return img_new, target
+
+    def __call__(self, img, target, p=1.0):
+        """
+        simpler - image transformation only
+        """
+        img_np = np.array(img)
+        if self.transform and random.random() < p:
+            new_res = self.transform(image=img_np)  # transformed
+            img_np = new_res['image']
+        img_new = Image.fromarray(img_np)
+
+        return img_new, target
+
