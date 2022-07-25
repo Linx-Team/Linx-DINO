@@ -220,10 +220,10 @@ class Albumentations:
     def __init__(self):
         import albumentations as A
         self.transform = A.Compose([
-            A.Blur(blur_limit=11, p=0.3),
-            A.RGBShift(p=0.35),
-            A.CLAHE(p=0.666),
-            A.RandomBrightnessContrast(p=0.2),
+            A.Blur(blur_limit=11, p=0.1),
+            A.RGBShift(p=0.1),
+            A.CLAHE(p=0.1),
+            A.RandomBrightnessContrast(p=0.05),
             A.RandomGamma(p=0.1),
             A.HueSaturationValue(p=0.1),
             # A.ImageCompression(quality_lower=75, p=0.005),
