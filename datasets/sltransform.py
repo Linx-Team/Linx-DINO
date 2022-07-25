@@ -221,15 +221,19 @@ class Albumentations:
         import albumentations as A
         self.transform = A.Compose([
             # A.Blur(p=0.01),
-            A.MedianBlur(p=0.1),
+            # A.RGBShift(p=0.1),
+            # A.MedianBlur(p=0.1),
+            A.Sharpen(p=0.2),
+            A.FancyPCA(alpha=0.5, p=0.2),
+            A.GaussNoise(var_limit=(0.25, 25), p=0.1),
             A.ToGray(p=0.1),
             A.CLAHE(p=0.1),
-            A.RandomBrightnessContrast(p=0.05),
+            A.RandomBrightnessContrast(p=0.1),
             A.RandomGamma(p=0.1),
             A.HueSaturationValue(p=0.1),
             # A.ImageCompression(quality_lower=75, p=0.005),
             ],
-            # bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']),
+            # bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
         )
 
     # def __call__(self, img, target, p=1.0):
