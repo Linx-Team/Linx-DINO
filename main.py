@@ -197,6 +197,15 @@ def main(args):
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=args.lr, steps_per_epoch=len(data_loader_train), epochs=args.epochs, pct_start=0.2)
     elif args.multi_step_lr:
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=args.lr_drop_list)
+    elif getattr(args, 'linear_scheduler_with_warmup'):
+        from training.scheduler import LinearSchedulerWithWarmup
+        lr_warmup = args.linear_scheduler_with_warmup
+        one_epoch_train_stps = len(dataset_train) / args.batch_size
+        lr_scheduler = LinearSchedulerWithWarmup(
+            optimizer=optimizer,
+            num_warmup_steps=lr_warmup * one_epoch_train_stps * args.epochs,
+            num_training_steps=one_epoch_train_stps * args.epochs
+        )
     else:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
