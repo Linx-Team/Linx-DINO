@@ -21,17 +21,13 @@ class LinearSchedulerWithWarmup(LambdaLR):
 		Return:
 			torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
 		"""
-		self.optimizer = optimizer
-		self.num_warmup_steps = num_warmup_steps
-		self.num_training_steps = num_training_steps
-		self.last_epoch = last_epoch
 
-		super(LinearSchedulerWithWarmup, self).__init__(optimizer, lr_lambda=self.lr_lambda, last_epoch=last_epoch)
+		def lr_lambda(current_step: int):
+			if current_step < num_warmup_steps:
+				return float(current_step) / float(max(1, num_warmup_steps))
+			return max(
+				0.0,
+				float(num_training_steps - current_step) / float(max(1, num_training_steps - num_warmup_steps))
+			)
 
-	def lr_lambda(self, current_step: int):
-		num_warmup_steps = self.num_warmup_steps
-		num_training_steps = self.num_training_steps
-
-		if current_step < num_warmup_steps:
-			return float(current_step) / float(max(1, num_warmup_steps))
-		return max(0.0, float(num_training_steps - current_step) / float(max(1, num_training_steps - num_warmup_steps)))
+		super(LinearSchedulerWithWarmup, self).__init__(optimizer, lr_lambda=lr_lambda, last_epoch=last_epoch)
