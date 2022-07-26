@@ -2,8 +2,7 @@
 import argparse
 import datetime
 import json
-
-
+import math
 
 import random
 import time
@@ -200,11 +199,11 @@ def main(args):
     elif getattr(args, 'linear_scheduler_with_warmup'):
         from training.scheduler import LinearSchedulerWithWarmup
         lr_warmup = args.linear_scheduler_with_warmup
-        one_epoch_train_stps = len(dataset_train) / args.batch_size
+        one_epoch_train_steps = math.ceil(len(dataset_train) / args.batch_size)
         lr_scheduler = LinearSchedulerWithWarmup(
             optimizer=optimizer,
-            num_warmup_steps=lr_warmup * one_epoch_train_stps * args.epochs,
-            num_training_steps=one_epoch_train_stps * args.epochs
+            num_warmup_steps=int(lr_warmup * one_epoch_train_steps * args.epochs),
+            num_training_steps=int(one_epoch_train_steps * args.epochs)
         )
     else:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
