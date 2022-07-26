@@ -579,9 +579,9 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
         #         ),
         #         normalize,
         #     ])
+        import datasets.sltransform as SLT
 
         if strong_aug:
-            import datasets.sltransform as SLT
 
             return T.Compose([
                 T.RandomHorizontalFlip(),
@@ -600,7 +600,6 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
                     SLT.AdjustBrightness(2),
                     SLT.AdjustContrast(2),
                 ]),
-                SLT.Albumentations(),
                 # # for debug only
                 # SLT.RandomCrop(),
                 # SLT.LightingNoise(),
@@ -620,6 +619,7 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
                     T.RandomResize(scales, max_size=max_size),
                 ])
             ),
+            SLT.Albumentations(),
             normalize,
         ])
 

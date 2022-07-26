@@ -223,48 +223,49 @@ class Albumentations:
             # A.Blur(p=0.01),
             # A.RGBShift(p=0.1),
             # A.MedianBlur(p=0.1),
-            A.Sharpen(p=0.2),
-            A.FancyPCA(alpha=0.5, p=0.2),
-            A.GaussNoise(var_limit=(0.25, 25), p=0.1),
-            A.ToGray(p=0.1),
-            A.CLAHE(p=0.1),
-            A.RandomBrightnessContrast(p=0.1),
-            A.RandomGamma(p=0.1),
-            A.HueSaturationValue(p=0.1),
+            # A.Sharpen(p=0.2),
+            # A.FancyPCA(alpha=0.5, p=0.2),
+            # A.GaussNoise(var_limit=(0.25, 25), p=0.1),
+            # A.ToGray(p=0.1),
+            # A.CLAHE(p=0.1),
+            # A.RandomBrightnessContrast(p=0.1),
+            # A.RandomGamma(p=0.1),
+            A.HueSaturationValue(hue_shift_limit=1, sat_shift_limit=1, val_shift_limit=1, p=1.0),
+            # A.Equalize(p=0.1),
             # A.ImageCompression(quality_lower=75, p=0.005),
             ],
-            # bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
+            bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
         )
-
-    # def __call__(self, img, target, p=1.0):
-    #     """
-    #     Input:
-    #         target['boxes']: xyxy, unnormalized data.
-    #
-    #     """
-    #     boxes_new = boxes_raw = target['boxes']
-    #     labels_new = labels_raw = target['labels']
-    #     img_np = np.array(img)
-    #     if self.transform and random.random() < p:
-    #         new_res = self.transform(image=img_np, bboxes=boxes_raw, class_labels=labels_raw)  # transformed
-    #         boxes_new = torch.Tensor(new_res['bboxes']).to(boxes_raw.dtype).reshape_as(boxes_raw)
-    #         img_np = new_res['image']
-    #         labels_new = torch.Tensor(new_res['class_labels']).to(labels_raw.dtype)
-    #     img_new = Image.fromarray(img_np)
-    #     target['boxes'] = boxes_new
-    #     target['labels'] = labels_new
-    #
-    #     return img_new, target
 
     def __call__(self, img, target, p=1.0):
         """
-        simpler - image transformation only
+        Input:
+            target['boxes']: xyxy, unnormalized data.
+
         """
+        boxes_new = boxes_raw = target['boxes']
+        labels_new = labels_raw = target['labels']
         img_np = np.array(img)
         if self.transform and random.random() < p:
-            new_res = self.transform(image=img_np)  # transformed
+            new_res = self.transform(image=img_np, bboxes=boxes_raw, class_labels=labels_raw)  # transformed
+            boxes_new = torch.Tensor(new_res['bboxes']).to(boxes_raw.dtype).reshape_as(boxes_raw)
             img_np = new_res['image']
+            labels_new = torch.Tensor(new_res['class_labels']).to(labels_raw.dtype)
         img_new = Image.fromarray(img_np)
+        target['boxes'] = boxes_new
+        target['labels'] = labels_new
 
         return img_new, target
+
+    # def __call__(self, img, target, p=1.0):
+    #     """
+    #     simpler - image transformation only
+    #     """
+    #     img_np = np.array(img)
+    #     if self.transform and random.random() < p:
+    #         new_res = self.transform(image=img_np)  # transformed
+    #         img_np = new_res['image']
+    #     img_new = Image.fromarray(img_np)
+    #
+    #     return img_new, target
 
