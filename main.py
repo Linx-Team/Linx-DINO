@@ -205,6 +205,15 @@ def main(args):
             num_warmup_steps=int(lr_warmup * one_epoch_train_steps * args.epochs),
             num_training_steps=int(one_epoch_train_steps * args.epochs)
         )
+    elif getattr(args, 'cosine_scheduler_with_warmup', None):
+        from training.scheduler import CosineSchedulerWithWarmup
+        lr_warmup = args.cosine_scheduler_with_warmup
+        one_epoch_train_steps = math.ceil(len(dataset_train) / args.batch_size)
+        lr_scheduler = CosineSchedulerWithWarmup(
+            optimizer=optimizer,
+            num_warmup_steps=int(lr_warmup * one_epoch_train_steps * args.epochs),
+            num_training_steps=int(one_epoch_train_steps * args.epochs)
+        )
     else:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
