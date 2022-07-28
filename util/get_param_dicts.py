@@ -27,12 +27,12 @@ def get_param_dict(args, model_without_ddp: nn.Module):
         param_dicts = [
             {
                 'params': [p for n, p in named_params if not any(x in n for x in backbone_params)],
-                "weight_decay": args.weight_decay
+                # "weight_decay": args.weight_decay
             },
             {
                 'params': [p for n, p in named_params if any(x in n for x in backbone_params)],
                 "lr": args.lr_backbone,
-                "weight_decay": 0.0
+                # "weight_decay": 0.0
              },
         ]
         return param_dicts
