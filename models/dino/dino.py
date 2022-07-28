@@ -35,6 +35,7 @@ from .utils import sigmoid_focal_loss, MLP
 
 from ..registry import MODULE_BUILD_FUNCS
 from .dn_components import prepare_for_cdn,dn_post_process, cuda
+from .projector import Projector
 
 
 class DINO(nn.Module):
@@ -55,6 +56,7 @@ class DINO(nn.Module):
                     two_stage_bbox_embed_share=True,
                     decoder_sa_type = 'sa',
                     num_patterns = 0,
+                    projection_type='dense_relu', # projection type for class embedding
                     dn_number = 100,
                     dn_box_noise_scale = 0.4,
                     dn_label_noise_ratio = 0.5,
@@ -131,7 +133,8 @@ class DINO(nn.Module):
         self.dec_pred_class_embed_share = dec_pred_class_embed_share
         self.dec_pred_bbox_embed_share = dec_pred_bbox_embed_share
         # prepare class & box embed
-        _class_embed = nn.Linear(hidden_dim, num_classes)
+        # _class_embed = nn.Linear(hidden_dim, num_classes)
+        _class_embed = Projector(hidden_dim, num_classes, d_hidden=hidden_dim, projection_type=projection_type)
         _bbox_embed = MLP(hidden_dim, hidden_dim, 4, 3)
         # init the two embed layers
         prior_prob = 0.01
