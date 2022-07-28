@@ -23,8 +23,13 @@ def get_param_dict(args, model_without_ddp: nn.Module):
     if param_dict_type == 'default':
         param_dicts = [
             {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
+            {"params": [p for n, p in model_without_ddp.named_parameters() if "bbox" not in n and p.requires_grad]},
             {
                 "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
+                "lr": args.lr_backbone,
+            },
+            {
+                "params": [p for n, p in model_without_ddp.named_parameters() if "bbox" in n and p.requires_grad],
                 "lr": args.lr_backbone,
             }
         ]
