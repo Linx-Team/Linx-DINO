@@ -170,9 +170,7 @@ def main(args):
 
     param_dicts = get_param_dict(args, model_without_ddp)
 
-    # optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
-    #                               weight_decay=args.weight_decay)
-    optimizer = torch.optim.SparseAdam(param_dicts, lr=args.lr)
+    optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
 
     dataset_train = build_dataset(image_set='train', args=args)
     dataset_val = build_dataset(image_set='val', args=args)
