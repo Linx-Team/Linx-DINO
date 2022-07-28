@@ -56,7 +56,7 @@ class DINO(nn.Module):
                     two_stage_bbox_embed_share=True,
                     decoder_sa_type = 'sa',
                     num_patterns = 0,
-                    projection_type='dense_relu', # projection type for class embedding
+                    projection_type='electra_head', # projection type for class embedding
                     dn_number = 100,
                     dn_box_noise_scale = 0.4,
                     dn_label_noise_ratio = 0.5,
