@@ -21,19 +21,12 @@ def get_param_dict(args, model_without_ddp: nn.Module):
 
     # by default
     if param_dict_type == 'default':
-        # backbone_params = ['backbone', 'bbox']
-        backbone_params = ['backbone']
-        named_params = model_without_ddp.named_parameters()
         param_dicts = [
+            {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
             {
-                'params': [p for n, p in named_params if not any(x in n for x in backbone_params)],
-                # "weight_decay": args.weight_decay
-            },
-            {
-                'params': [p for n, p in named_params if any(x in n for x in backbone_params)],
+                "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
                 "lr": args.lr_backbone,
-                # "weight_decay": 0.0
-             },
+            }
         ]
         return param_dicts
 
