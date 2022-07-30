@@ -25,12 +25,12 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
 	}
 
-	logger.info(f'trial{trial.number}  with this param : {opt_params}')
 	# logger.info(opt_params)
 	builder = LinxModelBuilder()
 	metrics = builder.train_model(**ADDED_PARAMS, **opt_params)
 
 	logger = logging.getLogger('linx')
+	logger.info(f'trial{trial.number}  with this param : {opt_params}')
 	logger.info(f'{trial.number} done with {metrics}')
 	score = metrics[BASE_METRIC_KEY]
 	return round(score, 6)
