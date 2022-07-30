@@ -184,6 +184,9 @@ class ModelBuilder:
 		if params_to_override:
 			cfg.merge_from_dict(params_to_override)
 
+		if args.output_dir:
+			Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
 		utils.init_distributed_mode(args)
 		# load cfg file and update the args
 		if args.rank == 0:
