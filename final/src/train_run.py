@@ -414,5 +414,6 @@ class ModelBuilder:
 
 if __name__ == '__main__':
 	builder = ModelBuilder()
-	result = builder.train_model(device='cpu')
+	# result = builder.train_model(device='cpu')
+	result = builder.train_model()
 	print(result)
