@@ -502,6 +502,7 @@ class ModelBuilder:
 
 
 if __name__ == '__main__':
-	builder = ModelBuilder()
+	# builder = ModelBuilder() #for debug
+	builder = ModelBuilder(num_workers=1) #for debug
 	result = builder.train_model(device='cuda' if torch.cuda.is_available() else 'cpu')
 	print(result)
