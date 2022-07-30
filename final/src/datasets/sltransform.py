@@ -234,7 +234,7 @@ class Albumentations:
             # A.Equalize(p=0.3),
             A.ImageCompression(quality_lower=args.quality_lower, p=args.image_compression_p),
             ],
-            bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
+            bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.5, label_fields=['class_labels']),
         )
 
     def __call__(self, img, target, p=1.0):
