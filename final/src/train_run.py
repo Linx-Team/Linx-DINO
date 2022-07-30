@@ -235,8 +235,8 @@ class ModelBuilder:
 			model_without_ddp = model.module
 		n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
 		logger.info('number of params:' + str(n_parameters))
-		logger.info(
-			"params:\n" + json.dumps({n: p.numel() for n, p in model.named_parameters() if p.requires_grad}, indent=2))
+		# logger.info(
+		# 	"params:\n" + json.dumps({n: p.numel() for n, p in model.named_parameters() if p.requires_grad}, indent=2))
 
 		param_dicts = get_param_dict(args, model_without_ddp)
 
