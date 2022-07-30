@@ -10,7 +10,7 @@ from typing import Dict
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, DistributedSampler
+from torch.utils.data import DataLoader, RandomSampler, BatchSampler
 from torch.utils.tensorboard import SummaryWriter
 
 import datasets
@@ -201,32 +201,30 @@ class ModelBuilder:
 		# build model
 		model.to(device)
 
+		# parameter logs
 		n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
 		named_parameters = model.named_parameters()
 		logger.info(f'number of params:{n_parameters}')
-		logger.info("params:\n" + json.dumps({n: p.numel() for n, p in named_parameters if p.requires_grad}, indent=2))
+		logger.debug("params:\n" + json.dumps({n: p.numel() for n, p in named_parameters if p.requires_grad}, indent=2))
 
-		param_dicts = get_param_dict(args, model_without_ddp)
-
+		param_dicts = get_param_dict(args, model)
 		optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
 
 		dataset_train = build_dataset(image_set='train', args=args)
 		dataset_val = build_dataset(image_set='val', args=args)
 
-		if args.distributed:
-			sampler_train = DistributedSampler(dataset_train)
-			sampler_val = DistributedSampler(dataset_val, shuffle=False)
-		else:
-			sampler_train = torch.utils.data.RandomSampler(dataset_train)
-			sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+		sampler_train = RandomSampler(dataset_train)
 
-		batch_sampler_train = torch.utils.data.BatchSampler(
-			sampler_train, args.batch_size, drop_last=True)
-
-		data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,
-									   collate_fn=utils.collate_fn, num_workers=args.num_workers)
-		data_loader_val = DataLoader(dataset_val, 1, sampler=sampler_val,
-									 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
+		data_loader_train = DataLoader(
+			dataset_train,
+			batch_size=args.batch_size,
+			drop_last=True, collate_fn=utils.collate_fn, num_workers=args.num_workers
+		)
+		data_loader_val = DataLoader(
+			dataset_val,
+			batch_size=args.batch_size,
+			drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers
+		)
 
 		if args.onecyclelr:
 			lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=args.lr,
@@ -265,7 +263,7 @@ class ModelBuilder:
 
 		if args.frozen_weights is not None:
 			checkpoint = torch.load(args.frozen_weights, map_location='cpu')
-			model_without_ddp.detr.load_state_dict(checkpoint['model'])
+			model.detr.load_state_dict(checkpoint['model'])
 
 		output_dir = Path(args.output_dir)
 		if os.path.exists(os.path.join(args.output_dir, 'checkpoint.pth')):
@@ -276,7 +274,7 @@ class ModelBuilder:
 					args.resume, map_location='cpu', check_hash=True)
 			else:
 				checkpoint = torch.load(args.resume, map_location='cpu')
-			model_without_ddp.load_state_dict(checkpoint['model'])
+			model.load_state_dict(checkpoint['model'])
 			if args.use_ema:
 				if 'ema_model' in checkpoint:
 					ema_m.module.load_state_dict(utils.clean_state_dict(checkpoint['ema_model']))
@@ -306,7 +304,7 @@ class ModelBuilder:
 			_tmp_st = OrderedDict(
 				{k: v for k, v in utils.clean_state_dict(checkpoint).items() if check_keep(k, _ignorekeywordlist)})
 
-			_load_output = model_without_ddp.load_state_dict(_tmp_st, strict=False)
+			_load_output = model.load_state_dict(_tmp_st, strict=False)
 			logger.info(str(_load_output))
 
 			if args.use_ema:
@@ -358,7 +356,7 @@ class ModelBuilder:
 					checkpoint_paths.append(output_dir / f'checkpoint{epoch:04}.pth')
 				for checkpoint_path in checkpoint_paths:
 					weights = {
-						'model': model_without_ddp.state_dict(),
+						'model': model.state_dict(),
 						'optimizer': optimizer.state_dict(),
 						'lr_scheduler': lr_scheduler.state_dict(),
 						'epoch': epoch,
@@ -380,7 +378,7 @@ class ModelBuilder:
 			if _isbest:
 				checkpoint_path = output_dir / 'checkpoint_best_regular.pth'
 				utils.save_on_master({
-					'model': model_without_ddp.state_dict(),
+					'model': model.state_dict(),
 					'optimizer': optimizer.state_dict(),
 					'lr_scheduler': lr_scheduler.state_dict(),
 					'epoch': epoch,
