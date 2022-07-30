@@ -220,6 +220,7 @@ class Albumentations:
     def __init__(self):
         import albumentations as A
         self.transform = A.Compose([
+            A.HueSaturationValue(hue_shift_limit=1, sat_shift_limit=1, val_shift_limit=1, p=1.0),
             # A.Blur(p=0.01),
             # A.RGBShift(p=0.1),
             A.MedianBlur(p=0.2),
@@ -231,7 +232,6 @@ class Albumentations:
             # A.RandomBrightnessContrast(p=0.1),
             # A.RandomGamma(p=0.3),
             # A.Equalize(p=0.3),
-            A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=5, val_shift_limit=5, p=1.0),
             # A.ImageCompression(quality_lower=75, p=0.005),
             ],
             bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
