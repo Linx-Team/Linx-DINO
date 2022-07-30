@@ -488,9 +488,9 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
 
     normalize = T.Compose([
         T.ToTensor(),
-        # T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) #Imagenet mean std
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) #Imagenet mean std
         # T.Normalize([0.5075, 0.5191, 0.5054], [0.2232, 0.2238, 0.2394]),# Linx data mean std
-        T.Normalize([2.3053, 0.1703, 0.5513], [1.3169, 0.1262, 0.2333]) #HSV mean std
+        # T.Normalize([2.3053, 0.1703, 0.5513], [1.3169, 0.1262, 0.2333]) #HSV mean std
     ])
 
     # config the params for data aug
