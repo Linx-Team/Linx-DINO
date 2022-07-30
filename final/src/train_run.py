@@ -19,57 +19,95 @@ from training.engine import evaluate, train_one_epoch
 from util.get_param_dicts import get_param_dict
 from util.logger import setup_logger
 from util.slconfig import SLConfig
-from util.utils import ModelEma, BestMetricHolder
+from util.utils import BestMetricHolder
 
 HOME = Path(os.environ['HOME'])
 PARAMS = SLConfig({
+	"add_channel_attention": False,
+	"add_pos_value": False,
+	"amp": False,
+	"aux_loss": True,
 	"backbone": "swin_L_384_22k",
-	"backbone_dir": str(HOME /".linx/backbones/swin/"),
+	"backbone_dir": str(HOME / ".linx/backbones/swin"),
 	"backbone_freeze_keywords": None,
+	"batch_norm_type": "FrozenBatchNorm2d",
 	"batch_size": 2,
+	"bbox_loss_coef": 5.0,
+	"box_attn_type": "roi_align",
 	"clip_max_norm": 0.1,
-	"dabdetr_yolo_like_anchor_update": False,
-	"dabdetr_deformable_encoder": False,
+	"cls_loss_coef": 1.0,
 	"dabdetr_deformable_decoder": False,
-	"data_aug_scales": [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800],
+	"dabdetr_deformable_encoder": False,
+	"dabdetr_yolo_like_anchor_update": False,
 	"data_aug_max_size": 1333,
-	"data_aug_scales2_resize": [400, 500, 600],
-	"data_aug_scales2_crop": [384, 600],
 	"data_aug_scale_overlap": None,
+	"data_aug_scales": [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800],
+	"data_aug_scales2_crop": [384, 600],
+	"data_aug_scales2_resize": [400, 500, 600],
 	"dataset_file": "linx",
 	"dataset_path": str(HOME / ".linx/datasets/linx_data"),
 	"ddetr_lr_param": False,
+	"debug": False,
+	"dec_layer_number": None,
+	"dec_layers": 6,
+	"dec_n_points": 4,
+	"dec_pred_bbox_embed_share": True,
+	"dec_pred_class_embed_share": True,
+	"decoder_layer_noise": False,
+	"decoder_module_seq": ["sa", "ca", "ffn"],
+	"decoder_sa_type": "sa",
+	"device": "cpu",
+	"dice_loss_coef": 1.0,
 	"dilation": False,
 	"dim_feedforward": 2048,
-	"device": "cuda",
+	"dln_hw_noise": 0.2,
+	"dln_xy_noise": 0.2,
 	"dn_bbox_coef": 1.0,
 	"dn_box_noise_scale": 1.0,
 	"dn_label_coef": 1.0,
+	"dn_label_noise_ratio": 0.5,
 	"dn_labelbook_size": 7,
+	"dn_number": 100,
 	"dn_scalar": 100,
 	"dropout": 0.0,
 	"embed_init_tgt": True,
+	"enc_layers": 6,
+	"enc_loss_coef": 1.0,
+	"enc_n_points": 4,
 	"epochs": 50,
 	"eval": False,
 	"find_unused_params": False,
 	"finetune_ignore": ["label_enc.weight", "class_embed"],
+	"fix_refpoints_hw": -1,
 	"fix_size": False,
 	"focal_alpha": 0.25,
 	"focal_gamma": 2.0,
+	"giou_loss_coef": 2.0,
 	"hidden_dim": 256,
-	"lr": 1e-04,
+	"interm_loss_coef": 1.0,
+	"lr": 0.0001,
 	"lr_backbone": 1e-05,
 	"lr_backbone_names": ["backbone.0"],
 	"lr_drop": 33,
 	"lr_drop_list": [33, 45],
-	"lr_linear_proj_names": ["reference_points", "sampling_offsets"],
 	"lr_linear_proj_mult": 0.1,
+	"lr_linear_proj_names": ["reference_points", "sampling_offsets"],
+	"mask_loss_coef": 1.0,
+	"masks": False,
+	"match_unstable_error": True,
+	"matcher_type": "HungarianMatcher",
 	"modelname": "dino",
 	"multi_step_lr": False,
 	"nheads": 8,
+	"nms_iou_threshold": -1,
+	"no_interm_box_loss": False,
 	"num_classes": 7,
+	"num_feature_levels": 4,
+	"num_patterns": 0,
 	"num_queries": 900,
+	"num_select": 300,
 	"num_workers": 10,
+	"onecyclelr": False,
 	"output_dir": "../models/finetune-0730",
 	"param_dict_type": "default",
 	"pdetr3_bbox_embed_diff_each_layer": False,
@@ -77,80 +115,41 @@ PARAMS = SLConfig({
 	"pe_temperatureH": 20,
 	"pe_temperatureW": 20,
 	"position_embedding": "sine",
+	"pre_norm": False,
 	"pretrain_model_path": str(HOME / ".linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth"),
 	"query_dim": 4,
+	"random_refpoints_xy": False,
 	"remove_difficult": False,
 	"resume": "",
 	"return_interm_indices": [1, 2, 3],
-	"save_checkpoint_interval": 1,
+	"save_checkpoint_interval": 0,
 	"save_log": True,
 	"save_results": True,
 	"seed": 42,
+	"set_cost_bbox": 5.0,
+	"set_cost_class": 2.0,
+	"set_cost_giou": 2.0,
 	"start_epoch": 0,
 	"strong_aug": False,
 	"test": False,
-	"two_stage_type": "standard",
-	"two_stage_pat_embed": 0,
+	"transformer_activation": "relu",
 	"two_stage_add_query_num": 0,
 	"two_stage_bbox_embed_share": False,
 	"two_stage_class_embed_share": False,
-	"two_stage_learn_wh": False,
 	"two_stage_default_hw": 0.05,
 	"two_stage_keep_all_tokens": False,
-	"use_checkpoint": True,
-	"use_dn": True,
-	"world_size": 1,
-	"weight_decay": 0.001,
-
-	# shold not be configurable - let's hardcode
-	"enc_layers": 6,
-	"dec_layers": 6,
+	"two_stage_learn_wh": False,
+	"two_stage_pat_embed": 0,
+	"two_stage_type": "standard",
 	"unic_layers": 0,
-	"pre_norm": False,
-
-	"num_patterns": 0,
-
-	"random_refpoints_xy": False,
-	"fix_refpoints_hw": -1,
-
+	"use_checkpoint": True,
 	"use_deformable_box_attn": False,
-	"box_attn_type": "roi_align",
-	"dec_layer_number": None,
-	"num_feature_levels": 4,
-	"enc_n_points": 4,
-	"dec_n_points": 4,
-	"decoder_layer_noise": False,
-	"dln_xy_noise": 0.2,
-	"dln_hw_noise": 0.2,
-	"add_channel_attention": False,
-	"add_pos_value": False,
-	"num_select": 300,
-	"transformer_activation": "relu",
-	"batch_norm_type": "FrozenBatchNorm2d",
-	"masks": False,
-	"aux_loss": True,
-	"set_cost_class": 2.0,
-	"set_cost_bbox": 5.0,
-	"set_cost_giou": 2.0,
-	"cls_loss_coef": 1.0,
-	"mask_loss_coef": 1.0,
-	"dice_loss_coef": 1.0,
-	"bbox_loss_coef": 5.0,
-	"giou_loss_coef": 2.0,
-	"enc_loss_coef": 1.0,
-	"interm_loss_coef": 1.0,
-	"no_interm_box_loss": False,
-	"decoder_sa_type": "sa",
-	"matcher_type": "HungarianMatcher",
-	"decoder_module_seq": ["sa", "ca", "ffn"],
-	"nms_iou_threshold": -1,
-	"dec_pred_bbox_embed_share": True,
-	"dec_pred_class_embed_share": True,
-	"dn_number": 100,
-	"dn_label_noise_ratio": 0.5,
-	"match_unstable_error": True,
 	"use_detached_boxes_dec_out": False,
-	"wo_class_error": False
+	"use_dn": True,
+	"use_ema": False,
+	"weight_decay": 0.001,
+	"wo_class_error": False,
+	"world_size": 1
 })
 
 # fix the seed for reproducibility
@@ -158,7 +157,9 @@ seed = PARAMS.seed + utils.get_rank()
 torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
-
+g = torch.Generator()
+g.manual_seed(0)
+torch.use_deterministic_algorithms(True)
 
 class ModelBuilder:
 
@@ -193,12 +194,11 @@ class ModelBuilder:
 		cfg.dump(save_cfg_path)
 		save_json_path = output_dir / "config_args_all.json"
 		with open(save_json_path, 'w') as f:
-			json.dump(cfg.config_dict, f, indent=2)
+			d = {k: v for k, v in sorted(cfg.config_dict.items(), key=lambda x: x[0])}
+			json.dump(d, f, indent=2)
 		logger.info(f"Full config saved to {save_json_path}")
 
 		device = torch.device(args.device)
-
-		# build model
 		model.to(device)
 
 		# parameter logs
@@ -213,12 +213,11 @@ class ModelBuilder:
 		dataset_train = build_dataset(image_set='train', args=args)
 		dataset_val = build_dataset(image_set='val', args=args)
 
-		sampler_train = RandomSampler(dataset_train)
-
 		data_loader_train = DataLoader(
 			dataset_train,
+			sampler=RandomSampler(dataset_train,generator=g),
 			batch_size=args.batch_size,
-			drop_last=True, collate_fn=utils.collate_fn, num_workers=args.num_workers
+			drop_last=True, collate_fn=utils.collate_fn, num_workers=args.num_workers,
 		)
 		data_loader_val = DataLoader(
 			dataset_val,
@@ -276,65 +275,50 @@ class ModelBuilder:
 		if (not resume_pth) and args.pretrain_model_path:
 			checkpoint = torch.load(args.pretrain_model_path, map_location='cpu')['model']
 			from collections import OrderedDict
-			_ignorekeywordlist = args.finetune_ignore if args.finetune_ignore else []
-			ignorelist = []
+			_ignore_keyword_list = args.finetune_ignore if args.finetune_ignore else []
+			ignore_list = []
 
 			def check_keep(keyname, ignorekeywordlist):
 				for keyword in ignorekeywordlist:
 					if keyword in keyname:
-						ignorelist.append(keyname)
+						ignore_list.append(keyname)
 						return False
 				return True
 
-			logger.info("Ignore keys: {}".format(json.dumps(ignorelist, indent=2)))
 			_tmp_st = OrderedDict(
-				{k: v for k, v in utils.clean_state_dict(checkpoint).items() if check_keep(k, _ignorekeywordlist)})
+				{
+					k: v for k, v
+					in utils.clean_state_dict(checkpoint).items()
+					if check_keep(k, _ignore_keyword_list)
+				}
+			)
+			logger.info(f"Ignore keys: {json.dumps(ignore_list, indent=2)}")
 
 			_load_output = model.load_state_dict(_tmp_st, strict=False)
 			logger.info(str(_load_output))
 
-			if args.use_ema:
-				if 'ema_model' in checkpoint:
-					ema_m.module.load_state_dict(utils.clean_state_dict(checkpoint['ema_model']))
-				else:
-					del ema_m
-					ema_m = ModelEma(model, args.ema_decay)
-
-		if args.eval:
-			os.environ['EVAL_FLAG'] = 'TRUE'
-			test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
-												  data_loader_val, base_ds, device, args.output_dir,
-												  wo_class_error=args.wo_class_error, args=args)
-			if args.output_dir:
-				utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
-
-			log_stats = {**{f'test_{k}': v for k, v in test_stats.items()}}
-			if args.output_dir and utils.is_main_process():
-				with (output_dir / "log.txt").open("a") as f:
-					f.write(json.dumps(log_stats) + "\n")
-
-			return
-
+		# tensorboard
 		writer = None
 		if utils.is_main_process():
 			writer = SummaryWriter(str(output_dir / 'tensorboard'))
 
 		print("Start training")
 		start_time = time.time()
-		best_map_holder = BestMetricHolder(use_ema=args.use_ema)
+		best_map_holder = BestMetricHolder()
+
+		last_stat = None
+		best_stat = None
 		for epoch in range(args.start_epoch, args.epochs):
 			epoch_start_time = time.time()
-			if args.distributed:
-				sampler_train.set_epoch(epoch)
 			train_stats = train_one_epoch(
-				model, criterion, data_loader_train, optimizer, device, epoch,
-				args.clip_max_norm, wo_class_error=wo_class_error, lr_scheduler=lr_scheduler, args=args,
-				logger=(logger if args.save_log else None), ema_m=ema_m)
-			if args.output_dir:
-				checkpoint_paths = [output_dir / 'checkpoint.pth']
+				model, criterion, data_loader_train, optimizer, device,
+				epoch=epoch,
+				max_norm=args.clip_max_norm,
+				lr_scheduler=lr_scheduler,
+				args=args,
+				logger=(logger if args.save_log else None)
+			)
 
-			if not args.onecyclelr:
-				lr_scheduler.step()
 			if args.output_dir:
 				checkpoint_paths = [output_dir / 'checkpoint.pth']
 				# extra checkpoint before LR drop and every 100 epochs
@@ -348,28 +332,46 @@ class ModelBuilder:
 						'epoch': epoch,
 						'args': args,
 					}
-					if args.use_ema:
-						weights.update({
-							'ema_model': ema_m.module.state_dict(),
-						})
 					utils.save_on_master(weights, checkpoint_path)
 
 			# eval
 			test_stats, coco_evaluator = evaluate(
-				model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir,
-				wo_class_error=args.wo_class_error, args=args, logger=(logger if args.save_log else None)
+				model,
+				criterion,
+				postprocessors,
+				data_loader_val,
+				base_ds=dataset_val.coco,
+				device = device,
+				output_dir= args.output_dir,
+				wo_class_error=args.wo_class_error,
+				args=args,
+				logger=(logger if args.save_log else None)
 			)
-			map_regular = test_stats['coco_eval_bbox'][0]
-			_isbest = best_map_holder.update(map_regular, epoch, is_ema=False)
+			log_stats = {
+				**{f'train_{k}': v for k, v in train_stats.items()},
+				**{f'test_{k}': v for k, v in test_stats.items()},
+				'epoch': epoch,
+				'n_parameters': n_parameters,
+				'now_time': str(datetime.datetime.now()),
+				'epoch_time': str(datetime.timedelta(seconds=int(time.time() - epoch_start_time)))
+			}
+			last_stat = log_stats
+
+			map_regular = test_stats['coco_eval_bbox'][1]  # AP50
+			_isbest = best_map_holder.update(map_regular, epoch)
 			if _isbest:
 				checkpoint_path = output_dir / 'checkpoint_best_regular.pth'
-				utils.save_on_master({
-					'model': model.state_dict(),
-					'optimizer': optimizer.state_dict(),
-					'lr_scheduler': lr_scheduler.state_dict(),
-					'epoch': epoch,
-					'args': args,
-				}, checkpoint_path)
+				utils.save_on_master(
+					{
+						'model': model.state_dict(),
+						'optimizer': optimizer.state_dict(),
+						'lr_scheduler': lr_scheduler.state_dict(),
+						'epoch': epoch,
+						'args': args,
+					},
+					checkpoint_path
+				)
+				best_stat = best_map_holder.summary()
 
 			# write test status
 			if utils.is_main_process():
@@ -388,59 +390,12 @@ class ModelBuilder:
 					if "corr" in key:
 						writer.add_scalar('test/' + key, value, epoch)
 
-			log_stats = {
-				**{f'train_{k}': v for k, v in train_stats.items()},
-				**{f'test_{k}': v for k, v in test_stats.items()},
-			}
-
-			# eval ema
-			if args.use_ema:
-				ema_test_stats, ema_coco_evaluator = evaluate(
-					ema_m.module, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir,
-					wo_class_error=args.wo_class_error, args=args, logger=(logger if args.save_log else None)
-				)
-				log_stats.update({f'ema_test_{k}': v for k, v in ema_test_stats.items()})
-				map_ema = ema_test_stats['coco_eval_bbox'][0]
-				_isbest = best_map_holder.update(map_ema, epoch, is_ema=True)
-				if _isbest:
-					checkpoint_path = output_dir / 'checkpoint_best_ema.pth'
-					utils.save_on_master({
-						'model': ema_m.module.state_dict(),
-						'optimizer': optimizer.state_dict(),
-						'lr_scheduler': lr_scheduler.state_dict(),
-						'epoch': epoch,
-						'args': args,
-					}, checkpoint_path)
-			log_stats.update(best_map_holder.summary())
-
-			ep_paras = {
-				'epoch': epoch,
-				'n_parameters': n_parameters
-			}
-			log_stats.update(ep_paras)
-			try:
-				log_stats.update({'now_time': str(datetime.datetime.now())})
-			except:
-				pass
-
-			epoch_time = time.time() - epoch_start_time
-			epoch_time_str = str(datetime.timedelta(seconds=int(epoch_time)))
-			log_stats['epoch_time'] = epoch_time_str
-
 			if args.output_dir and utils.is_main_process():
 				with (output_dir / "log.txt").open("a") as f:
 					f.write(json.dumps(log_stats) + "\n")
 
-				# for evaluation logs
-				if coco_evaluator is not None:
-					(output_dir / 'eval').mkdir(exist_ok=True)
-					if "bbox" in coco_evaluator.coco_eval:
-						filenames = ['latest.pth']
-						if epoch % 50 == 0:
-							filenames.append(f'{epoch:03}.pth')
-						for name in filenames:
-							torch.save(coco_evaluator.coco_eval["bbox"].eval,
-									   output_dir / "eval" / name)
+		# for evaluation logs
+
 		total_time = time.time() - start_time
 		total_time_str = str(datetime.timedelta(seconds=int(total_time)))
 		print('Training time {}'.format(total_time_str))
@@ -450,8 +405,10 @@ class ModelBuilder:
 		if copyfilelist and args.local_rank == 0:
 			from datasets.data_util import remove
 			for filename in copyfilelist:
-				print("Removing: {}".format(filename))
+				print(f"Removing: {filename}")
 				remove(filename)
+
+		return {**last_stat, **best_stat}
 
 
 if __name__ == '__main__':
