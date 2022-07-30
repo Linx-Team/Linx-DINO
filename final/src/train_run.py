@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import json
 import math
@@ -10,12 +9,11 @@ from typing import Dict
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, RandomSampler, BatchSampler
+from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
-import datasets
 import util.misc as utils
-from datasets import build_dataset, get_coco_api_from_dataset
+from datasets import build_dataset
 from models.dino.dino import build_dino
 from training.engine import evaluate, train_one_epoch
 from util.get_param_dicts import get_param_dict
@@ -23,9 +21,10 @@ from util.logger import setup_logger
 from util.slconfig import SLConfig
 from util.utils import ModelEma, BestMetricHolder
 
+HOME = Path(os.environ['HOME'])
 PARAMS = SLConfig({
 	"backbone": "swin_L_384_22k",
-	"backbone_dir": "/home/ubuntu/.linx/backbones/swin/",
+	"backbone_dir": str(HOME /".linx/backbones/swin/"),
 	"backbone_freeze_keywords": None,
 	"batch_size": 2,
 	"clip_max_norm": 0.1,
@@ -38,7 +37,7 @@ PARAMS = SLConfig({
 	"data_aug_scales2_crop": [384, 600],
 	"data_aug_scale_overlap": None,
 	"dataset_file": "linx",
-	"dataset_path": "/home/ubuntu/.linx/datasets/linx_data",
+	"dataset_path": str(HOME / ".linx/datasets/linx_data"),
 	"ddetr_lr_param": False,
 	"dilation": False,
 	"dim_feedforward": 2048,
@@ -55,7 +54,8 @@ PARAMS = SLConfig({
 	"find_unused_params": False,
 	"finetune_ignore": ["label_enc.weight", "class_embed"],
 	"fix_size": False,
-	"frozen_weights": None,
+	"focal_alpha": 0.25,
+	"focal_gamma": 2.0,
 	"hidden_dim": 256,
 	"lr": 1e-04,
 	"lr_backbone": 1e-05,
@@ -70,14 +70,14 @@ PARAMS = SLConfig({
 	"num_classes": 7,
 	"num_queries": 900,
 	"num_workers": 10,
-	"output_dir": "logs/dino/finetune-0724",
+	"output_dir": "../models/finetune-0730",
 	"param_dict_type": "default",
 	"pdetr3_bbox_embed_diff_each_layer": False,
 	"pdetr3_refHW": -1,
 	"pe_temperatureH": 20,
 	"pe_temperatureW": 20,
 	"position_embedding": "sine",
-	"pretrain_model_path": "/home/ubuntu/.linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth",
+	"pretrain_model_path": str(HOME / ".linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth"),
 	"query_dim": 4,
 	"remove_difficult": False,
 	"resume": "",
@@ -140,7 +140,6 @@ PARAMS = SLConfig({
 	"enc_loss_coef": 1.0,
 	"interm_loss_coef": 1.0,
 	"no_interm_box_loss": False,
-	"focal_alpha": 0.25,
 	"decoder_sa_type": "sa",
 	"matcher_type": "HungarianMatcher",
 	"decoder_module_seq": ["sa", "ca", "ffn"],
@@ -175,7 +174,7 @@ class ModelBuilder:
 
 	def train_model(self, **params_to_override) -> Dict:
 		if params_to_override:
-			self.params.merge_from_dict(**params_to_override)
+			self.params.merge_from_dict(params_to_override)
 
 		args = cfg = self.params
 		model = self.model
@@ -184,14 +183,15 @@ class ModelBuilder:
 
 		# setup logger
 		os.makedirs(args.output_dir, exist_ok=True)
-		log_file_path = os.path.join(args.output_dir, 'info.txt')
-		logger = setup_logger(output=log_file_path, color=False, name="linx")
+		output_dir = Path(args.output_dir)
+		log_file_path = output_dir / 'info.txt'
+		logger = setup_logger(output=str(log_file_path), color=False, name="linx")
 		logger.info(f"args: {args} \n")
 
 		# save config
-		save_cfg_path = os.path.join(args.output_dir, "config_cfg.py")
+		save_cfg_path = output_dir / "config_cfg.py"
 		cfg.dump(save_cfg_path)
-		save_json_path = os.path.join(cfg.output_dir, "config_args_all.json")
+		save_json_path = output_dir / "config_args_all.json"
 		with open(save_json_path, 'w') as f:
 			json.dump(cfg.config_dict, f, indent=2)
 		logger.info(f"Full config saved to {save_json_path}")
@@ -226,12 +226,8 @@ class ModelBuilder:
 			drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers
 		)
 
-		if args.onecyclelr:
-			lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=args.lr,
-															   steps_per_epoch=len(data_loader_train),
-															   epochs=args.epochs,
-															   pct_start=0.2)
-		elif args.multi_step_lr:
+		# learning rate scheduler
+		if args.multi_step_lr:
 			lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, gamma=0.001, milestones=args.lr_drop_list)
 		elif getattr(args, 'linear_scheduler_with_warmup', None):
 			from training.scheduler import LinearSchedulerWithWarmup
@@ -254,40 +250,30 @@ class ModelBuilder:
 		else:
 			lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
-		if args.dataset_file == "coco_panoptic":
-			# We also evaluate AP during panoptic training, on original coco DS
-			coco_val = datasets.coco.build("val", args)
-			base_ds = get_coco_api_from_dataset(coco_val)
-		else:
-			base_ds = get_coco_api_from_dataset(dataset_val)
+		# if args.dataset_file == "coco_panoptic":
+		# 	# We also evaluate AP during panoptic training, on original coco DS
+		# 	coco_val = datasets.coco.build("val", args)
+		# 	base_ds = get_coco_api_from_dataset(coco_val)
+		# else:
+		# 	base_ds = get_coco_api_from_dataset(dataset_val)
 
-		if args.frozen_weights is not None:
-			checkpoint = torch.load(args.frozen_weights, map_location='cpu')
-			model.detr.load_state_dict(checkpoint['model'])
+		# if args.frozen_weights is not None:
+		# 	checkpoint = torch.load(args.frozen_weights, map_location='cpu')
+		# 	model.detr.load_state_dict(checkpoint['model'])
+		#
 
-		output_dir = Path(args.output_dir)
-		if os.path.exists(os.path.join(args.output_dir, 'checkpoint.pth')):
-			args.resume = os.path.join(args.output_dir, 'checkpoint.pth')
-		if args.resume:
-			if args.resume.startswith('https'):
-				checkpoint = torch.hub.load_state_dict_from_url(
-					args.resume, map_location='cpu', check_hash=True)
-			else:
-				checkpoint = torch.load(args.resume, map_location='cpu')
+		resume_pth = None
+		if (output_dir / 'checkpoint.pth').exists():
+			resume_pth = str(output_dir / 'checkpoint.pth')
+			checkpoint = torch.load(resume_pth, map_location='cpu')
 			model.load_state_dict(checkpoint['model'])
-			if args.use_ema:
-				if 'ema_model' in checkpoint:
-					ema_m.module.load_state_dict(utils.clean_state_dict(checkpoint['ema_model']))
-				else:
-					del ema_m
-					ema_m = ModelEma(model, args.ema_decay)
 
 			if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
 				optimizer.load_state_dict(checkpoint['optimizer'])
 				lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
 				args.start_epoch = checkpoint['epoch'] + 1
 
-		if (not args.resume) and args.pretrain_model_path:
+		if (not resume_pth) and args.pretrain_model_path:
 			checkpoint = torch.load(args.pretrain_model_path, map_location='cpu')['model']
 			from collections import OrderedDict
 			_ignorekeywordlist = args.finetune_ignore if args.finetune_ignore else []
@@ -318,7 +304,7 @@ class ModelBuilder:
 			os.environ['EVAL_FLAG'] = 'TRUE'
 			test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
 												  data_loader_val, base_ds, device, args.output_dir,
-												  wo_class_error=wo_class_error, args=args)
+												  wo_class_error=args.wo_class_error, args=args)
 			if args.output_dir:
 				utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
 
@@ -469,8 +455,6 @@ class ModelBuilder:
 
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
-	args = parser.parse_args()
-	if args.output_dir:
-		Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-	main(args)
+	builder = ModelBuilder()
+	result = builder.train_model(device='cpu')
+	print(result)
