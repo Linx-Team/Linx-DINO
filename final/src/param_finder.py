@@ -6,7 +6,7 @@ import optuna
 import torch
 from train_run import LinxModelBuilder, ADDED_PARAMS
 
-BASE_METRIC_KEY = 'all_best_res'
+BASE_METRIC_KEY = 'best_res'
 opt_proc_num = os.environ.get('OPT_PROC_NUM', 0)
 
 
@@ -21,7 +21,7 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 		'quality_lower': trial.suggest_float('quality_lower', 65, 85, step=10),
 		'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
 
-		'epochs': 2, #poch limit
+		'epochs': 10, #poch limit
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
 	}
 
@@ -31,7 +31,7 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 
 	logger = logging.getLogger('linx')
 	logger.info(f'trial{trial.number}  with this param : {opt_params}')
-	logger.info(f'{trial.number} done with {metrics}')
+	# logger.info(f'{trial.number} done with {metrics}')
 	score = metrics[BASE_METRIC_KEY]
 	return round(score, 6)
 
