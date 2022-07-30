@@ -23,59 +23,6 @@ from util.logger import setup_logger
 from util.slconfig import SLConfig
 from util.utils import ModelEma, BestMetricHolder
 
-# def get_args_parser():
-#     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
-#     parser.add_argument('--config_file', '-c', type=str, required=True)
-#     parser.add_argument('--options',
-#         nargs='+',
-#         action=DictAction,
-#         help='override some settings in the used config, the key-value pair '
-#         'in xxx=yyy format will be merged into config file.')
-#
-#     # dataset parameters
-#     parser.add_argument('--dataset_file', default='coco')
-#     parser.add_argument('--coco_path', type=str, default='~/.linx/datasets/coco_2017')
-#     parser.add_argument('--coco_panoptic_path', type=str)
-#     parser.add_argument('--remove_difficult', action='store_true')
-#     parser.add_argument('--fix_size', action='store_true')
-#
-#
-#     # training parameters
-#     parser.add_argument('--output_dir', default='logs/dino/R50',
-#                         help='path where to save, empty for no saving')
-#     parser.add_argument('--note', default='',
-#                         help='add some notes to the experiment')
-#     parser.add_argument('--device', default='cuda',
-#                         help='device to use for training / testing')
-#     parser.add_argument('--seed', default=42, type=int)
-#     parser.add_argument('--resume', default='', help='resume from checkpoint')
-#     parser.add_argument('--pretrain_model_path', help='load from other checkpoint')
-#     parser.add_argument('--finetune_ignore', type=str, nargs='+')
-#     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
-#                         help='start epoch')
-#     parser.add_argument('--strong_aug', action='store_true')
-#     parser.add_argument('--eval', action='store_true')
-#     parser.add_argument('--num_workers', default=10, type=int)
-#     parser.add_argument('--test', action='store_true')
-#     parser.add_argument('--debug', action='store_true')
-#     parser.add_argument('--find_unused_params', action='store_true')
-#
-#
-#     parser.add_argument('--save_results', action='store_true')
-#     parser.add_argument('--save_log', action='store_true')
-#
-#     # distributed training parameters
-#     parser.add_argument('--world_size', default=1, type=int,
-#                         help='number of distributed processes')
-#     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
-#     parser.add_argument('--rank', default=0, type=int,
-#                         help='number of distributed processes')
-#     parser.add_argument("--local_rank", type=int, help='local rank for DistributedDataParallel')
-#     parser.add_argument('--amp', action='store_true',
-#                         help="Train with mixed precision")
-#
-#     return parser
-
 
 def build_model_main(args):
 	# we use register to maintain models from catdet6 on.
@@ -84,6 +31,15 @@ def build_model_main(args):
 	build_func = MODULE_BUILD_FUNCS.get(args.modelname)
 	model, criterion, postprocessors = build_func(args)
 	return model, criterion, postprocessors
+
+
+HOME = Path(os.environ['HOME'])
+ADDED_PARAMS = {
+	"dataset_path": str(HOME / ".linx/datasets/linx_data"),
+	"pretrain_model_path": str(HOME / ".linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth"),
+	"backbone_dir": str(HOME / ".linx/backbones/swin/"),
+	"device": 'cuda' if torch.cuda.is_available() else 'cpu'
+}
 
 
 class LinxModelBuilder(object):
@@ -445,14 +401,6 @@ if __name__ == '__main__':
 	# parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
 	# args = parser.parse_args()
 	# main(args)
-	HOME = Path(os.environ['HOME'])
-	ADDED_PARAMS = {
-		"dataset_path": str(HOME / ".linx/datasets/linx_data"),
-		"output_dir": str("../models/finetune-0731"),
-		"pretrain_model_path": str(HOME / ".linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth"),
-		"backbone_dir": str(HOME / ".linx/backbones/swin/"),
-		"device": 'cuda' if torch.cuda.is_available() else 'cpu'
-	}
-
+	output_dir = "../models/finetune-0731"
 	builder = LinxModelBuilder()
-	builder.train_model(config_file='config_args_all.json', **ADDED_PARAMS)
+	builder.train_model(config_file='config_args_all.json', output_dir=output_dir, **ADDED_PARAMS)

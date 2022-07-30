@@ -4,7 +4,7 @@ from typing import Dict
 
 import optuna
 import torch
-from train_run import LinxModelBuilder
+from train_run import LinxModelBuilder, ADDED_PARAMS
 
 logger = logging.getLogger(__name__)
 BASE_METRIC_KEY = 'all_best_res'
@@ -24,13 +24,12 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 
 		'epochs': 1, #poch limit
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
-		'device': 'cuda' if torch.cuda.is_available() else 'cpu',
 	}
 
 	logger.info(f'trial{trial.number}  with this param : {opt_params}')
 	# logger.info(opt_params)
 	builder = LinxModelBuilder()
-	metrics = builder.train_model()
+	metrics = builder.train_model(**ADDED_PARAMS, **opt_params)
 	logger.info(f'{trial.number} done with {metrics}')
 	score = metrics[BASE_METRIC_KEY]
 	return round(score, 6)
