@@ -6,7 +6,6 @@ import optuna
 import torch
 from train_run import LinxModelBuilder, ADDED_PARAMS
 
-logger = logging.getLogger(__name__)
 BASE_METRIC_KEY = 'all_best_res'
 opt_proc_num = os.environ.get('OPT_PROC_NUM', 0)
 
@@ -30,6 +29,8 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 	# logger.info(opt_params)
 	builder = LinxModelBuilder()
 	metrics = builder.train_model(**ADDED_PARAMS, **opt_params)
+
+	logger = logging.getLogger('linx')
 	logger.info(f'{trial.number} done with {metrics}')
 	score = metrics[BASE_METRIC_KEY]
 	return round(score, 6)
