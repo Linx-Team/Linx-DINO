@@ -619,7 +619,7 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
                     T.RandomResize(scales, max_size=max_size),
                 ])
             ),
-            # SLT.Albumentations(args),
+            SLT.Albumentations(args),
             normalize,
         ])
 
