@@ -261,7 +261,7 @@ class LinxModelBuilder(object):
 			print("Start training")
 			start_time = time.time()
 			best_map_holder = BestMetricHolder(use_ema=args.use_ema)
-			last_stats = None
+			last_stats = {}
 			for epoch in range(args.start_epoch, args.epochs):
 				epoch_start_time = time.time()
 				if args.distributed:
@@ -299,7 +299,8 @@ class LinxModelBuilder(object):
 					model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir,
 					wo_class_error=wo_class_error, args=args, logger=(logger if args.save_log else None)
 				)
-				map_regular = test_stats['coco_eval_bbox'][0]
+				# map_regular = test_stats['coco_eval_bbox'][0]
+				map_regular = test_stats['coco_eval_bbox'][1] #AP50 기준
 				_isbest = best_map_holder.update(map_regular, epoch, is_ema=False)
 				if _isbest:
 					checkpoint_path = output_dir / 'checkpoint_best_regular.pth'
@@ -367,6 +368,8 @@ class LinxModelBuilder(object):
 				epoch_time_str = str(datetime.timedelta(seconds=int(epoch_time)))
 				log_stats['epoch_time'] = epoch_time_str
 				last_stats = log_stats
+
+				logger.info(f'result:{json.dumps(log_stats)}')
 				if args.output_dir and utils.is_main_process():
 					with (output_dir / "log.txt").open("a") as f:
 						f.write(json.dumps(log_stats) + "\n")
