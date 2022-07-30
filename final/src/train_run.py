@@ -47,7 +47,7 @@ PARAMS = SLConfig({
 	"dataset_file": "linx",
 	"dataset_path": str(HOME / ".linx/datasets/linx_data"),
 	"ddetr_lr_param": False,
-	"debug": False,
+	"debug": True,
 	"dec_layer_number": None,
 	"dec_layers": 6,
 	"dec_n_points": 4,
@@ -85,7 +85,7 @@ PARAMS = SLConfig({
 	"giou_loss_coef": 2.0,
 	"hidden_dim": 256,
 	"interm_loss_coef": 1.0,
-	"lr": 0.0001,
+	"lr": 8e-5,
 	"lr_backbone": 1e-05,
 	"lr_backbone_names": ["backbone.0"],
 	"lr_drop": 33,
@@ -414,6 +414,5 @@ class ModelBuilder:
 
 if __name__ == '__main__':
 	builder = ModelBuilder()
-	# result = builder.train_model(device='cpu')
-	result = builder.train_model()
+	result = builder.train_model(device='cuda' if torch.cuda.is_available() else 'cpu')
 	print(result)
