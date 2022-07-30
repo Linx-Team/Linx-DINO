@@ -101,6 +101,12 @@ def train_one_epoch(
 			metric_logger.update(class_error=loss_dict_reduced['class_error'])
 		metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 
+		_cnt += 1
+		if args.debug:
+			if _cnt % 15 == 0:
+				print("BREAK!" * 5)
+				break
+
 	if getattr(criterion, 'loss_weight_decay', False):
 		criterion.loss_weight_decay(epoch=epoch)
 	if getattr(criterion, 'tuning_matching', False):
