@@ -172,5 +172,6 @@
   "dn_label_coef": 1.0,
   "dn_bbox_coef": 1.0,
   "backbone_dir": "/home/ubuntu/.linx/backbones/swin/",
-  "config_file": "config_args_all.json"
+  "config_file": "config_args_all.json",
+  "print_freq": 200
 }
