@@ -56,7 +56,7 @@ PARAMS = SLConfig({
 	"decoder_layer_noise": False,
 	"decoder_module_seq": ["sa", "ca", "ffn"],
 	"decoder_sa_type": "sa",
-	"device": "cpu",
+	"device": "cuda",
 	"dice_loss_coef": 1.0,
 	"dilation": False,
 	"dim_feedforward": 2048,
