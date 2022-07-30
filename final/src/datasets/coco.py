@@ -701,23 +701,25 @@ def get_aux_target_hacks_list(image_set, args):
 
 
 def build(image_set, args):
-    root = Path(args.coco_path)
+    root = Path(args.dataset_path)
     # assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
-    # PATHS = {
-    #     "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-    #     "train_reg": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-    #     "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-    #     "eval_debug": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-    #     "test": (root / "test2017", root / "annotations" / 'image_info_test-dev2017.json' ),
-    # }
-    PATHS = {
-        "train": (root / "train", root / "annotations" / f'{mode}_train.json'),
-        "train_reg": (root / "train", root / "annotations" / f'{mode}_train.json'),
-        "val": (root / "val", root / "annotations" / f'{mode}_val.json'),
-        "eval_debug": (root / "val", root / "annotations" / f'{mode}_val.json'),
-        # "test": (root / "test", root / "annotations" / 'image_info_test-dev.json'),
-    }
+    if root == 'coco':
+        PATHS = {
+            "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
+            "train_reg": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
+            "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
+            "eval_debug": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
+            "test": (root / "test2017", root / "annotations" / 'image_info_test-dev2017.json' ),
+        }
+    else:
+        PATHS = {
+            "train": (root / "train", root / "annotations" / f'{mode}_train.json'),
+            "train_reg": (root / "train", root / "annotations" / f'{mode}_train.json'),
+            "val": (root / "val", root / "annotations" / f'{mode}_val.json'),
+            "eval_debug": (root / "val", root / "annotations" / f'{mode}_val.json'),
+            # "test": (root / "test", root / "annotations" / 'image_info_test-dev.json'),
+        }
 
     # add some hooks to datasets
     aux_target_hacks_list = get_aux_target_hacks_list(image_set, args)
