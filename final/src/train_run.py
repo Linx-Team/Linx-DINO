@@ -88,9 +88,9 @@ def build_model_main(args):
 
 class LinxModelBuilder(object):
 	def __init__(self):
-		print ('model builder initiated')
+		print('model builder initiated')
 
-	def train_model(self, config_file: str, **params_to_overwrite) -> Dict:
+	def train_model(self, config_file: str = 'config_args_all.json', **params_to_overwrite) -> Dict:
 
 		# load cfg file and update the args
 		print(f"Loading config file from {config_file}")
@@ -450,9 +450,9 @@ if __name__ == '__main__':
 		"dataset_path": str(HOME / ".linx/datasets/linx_data"),
 		"output_dir": str("../models/finetune-0731"),
 		"pretrain_model_path": str(HOME / ".linx/checkpoints/coco-dino-swin/checkpoint_best_regular.pth"),
-		"backbone_dir": str(HOME / ".linx/backbones/swin/")
+		"backbone_dir": str(HOME / ".linx/backbones/swin/"),
+		"device": 'cuda' if torch.cuda.is_available() else 'cpu'
 	}
-	device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 	builder = LinxModelBuilder()
-	builder.train_model(config_file='config_args_all.json', device=device, **ADDED_PARAMS)
+	builder.train_model(config_file='config_args_all.json', **ADDED_PARAMS)

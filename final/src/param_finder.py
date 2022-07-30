@@ -3,8 +3,8 @@ import os
 from typing import Dict
 
 import optuna
-
-from train_run import ModelBuilder, PARAMS
+import torch
+from train_run import LinxModelBuilder
 
 logger = logging.getLogger(__name__)
 BASE_METRIC_KEY = 'all_best_res'
@@ -12,7 +12,7 @@ opt_proc_num = os.environ.get('OPT_PROC_NUM', 0)
 
 
 def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
-	OPT_PARAMS = {
+	opt_params = {
 		'gause_noise_p': trial.suggest_float('gause_noise_p', 0, 0.5, step=0.1),
 		'brightness_limit': trial.suggest_float('brightness_limit', 0, 0.5, step=0.1),
 		'contrast_limit': trial.suggest_float('contrast_limit', 0, 0.5, step=0.1),
@@ -23,12 +23,13 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 		'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
 
 		'epochs': 1, #poch limit
-		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}'
+		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
+		'device': 'cuda' if torch.cuda.is_available() else 'cpu',
 	}
 
-	logger.info(f'train with this param : , {OPT_PARAMS}')
-	# logger.info(OPT_PARAMS)
-	builder = ModelBuilder(**OPT_PARAMS)
+	logger.info(f'trial{trial.number}  with this param : {opt_params}')
+	# logger.info(opt_params)
+	builder = LinxModelBuilder()
 	metrics = builder.train_model()
 	logger.info(f'{trial.number} done with {metrics}')
 	score = metrics[BASE_METRIC_KEY]
@@ -37,6 +38,9 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 
 if __name__ == '__main__':
 	optimization = True
+	PARAMS = {
+		"output_dir": '../models/finetune-0731'
+	}
 	if optimization:
 		study = optuna.create_study(direction='maximize', study_name='param_finder')
 		process_number = 0
