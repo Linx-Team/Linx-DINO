@@ -122,7 +122,7 @@ PARAMS = SLConfig({
 	"remove_difficult": False,
 	"resume": "",
 	"return_interm_indices": [1, 2, 3],
-	"save_checkpoint_interval": 0,
+	"save_checkpoint_interval": 100, #저장하지 말것
 	"save_log": True,
 	"save_results": True,
 	"seed": 42,
