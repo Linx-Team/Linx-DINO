@@ -161,6 +161,7 @@ g = torch.Generator()
 g.manual_seed(0)
 torch.use_deterministic_algorithms(True)
 
+
 class ModelBuilder:
 
 	def __init__(self, **kwargs):
@@ -215,7 +216,7 @@ class ModelBuilder:
 
 		data_loader_train = DataLoader(
 			dataset_train,
-			sampler=RandomSampler(dataset_train,generator=g),
+			sampler=RandomSampler(dataset_train, generator=g),
 			batch_size=args.batch_size,
 			drop_last=True, collate_fn=utils.collate_fn, num_workers=args.num_workers,
 		)
@@ -341,8 +342,8 @@ class ModelBuilder:
 				postprocessors,
 				data_loader_val,
 				base_ds=dataset_val.coco,
-				device = device,
-				output_dir= args.output_dir,
+				device=device,
+				output_dir=args.output_dir,
 				wo_class_error=args.wo_class_error,
 				args=args,
 				logger=(logger if args.save_log else None)

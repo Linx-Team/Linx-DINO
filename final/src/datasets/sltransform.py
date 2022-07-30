@@ -41,7 +41,7 @@ def lighting_noise(image):
         image: A PIL image
     '''
     new_image = image
-    perms = ((0, 1, 2), (0, 2, 1), (1, 0, 2), 
+    perms = ((0, 1, 2), (0, 2, 1), (1, 0, 2),
              (1, 2, 0), (2, 0, 1), (2, 1, 0))
     swap = perms[random.randint(0, len(perms)- 1)]
     new_image = F.to_tensor(new_image)
@@ -62,12 +62,12 @@ def rotate(image, boxes, angle):
         Rotate image and bounding box
         image: A Pil image (w, h)
         boxes: A tensors of dimensions (#objects, 4)
-        
+
         Out: rotated image (w, h), rotated boxes
     '''
     new_image = image.copy()
     new_boxes = boxes.clone()
-    
+
     #Rotate image, expand = True
     w = image.width
     h = image.height
@@ -80,45 +80,45 @@ def rotate(image, boxes, angle):
     #Get affine matrix
     AffineMatrix = torch.tensor([[alpha, beta, (1-alpha)*cx - beta*cy],
                                  [-beta, alpha, beta*cx + (1-alpha)*cy]])
-    
+
     #Rotation boxes
     box_width = (boxes[:,2] - boxes[:,0]).reshape(-1,1)
     box_height = (boxes[:,3] - boxes[:,1]).reshape(-1,1)
-    
+
     #Get corners for boxes
     x1 = boxes[:,0].reshape(-1,1)
     y1 = boxes[:,1].reshape(-1,1)
-    
+
     x2 = x1 + box_width
-    y2 = y1 
-    
+    y2 = y1
+
     x3 = x1
     y3 = y1 + box_height
-    
+
     x4 = boxes[:,2].reshape(-1,1)
     y4 = boxes[:,3].reshape(-1,1)
-    
+
     corners = torch.stack((x1,y1,x2,y2,x3,y3,x4,y4), dim= 1)
     # corners.reshape(-1, 8)    #Tensors of dimensions (#objects, 8)
     corners = corners.reshape(-1,2) #Tensors of dimension (4* #objects, 2)
     corners = torch.cat((corners, torch.ones(corners.shape[0], 1)), dim= 1) #(Tensors of dimension (4* #objects, 3))
-    
+
     cos = np.abs(AffineMatrix[0, 0])
     sin = np.abs(AffineMatrix[0, 1])
-    
+
     nW = int((h * sin) + (w * cos))
     nH = int((h * cos) + (w * sin))
     AffineMatrix[0, 2] += (nW / 2) - cx
     AffineMatrix[1, 2] += (nH / 2) - cy
-    
+
     # import ipdb; ipdb.set_trace()
     #Apply affine transform
     rotate_corners = torch.mm(AffineMatrix, corners.t().to(torch.float64)).t()
     rotate_corners = rotate_corners.reshape(-1,8)
-    
+
     x_corners = rotate_corners[:,[0,2,4,6]]
     y_corners = rotate_corners[:,[1,3,5,7]]
-    
+
     #Get (x_min, y_min, x_max, y_max)
     x_min, _ = torch.min(x_corners, dim= 1)
     x_min = x_min.reshape(-1, 1)
@@ -128,16 +128,16 @@ def rotate(image, boxes, angle):
     x_max = x_max.reshape(-1, 1)
     y_max, _ = torch.max(y_corners, dim= 1)
     y_max = y_max.reshape(-1, 1)
-    
+
     new_boxes = torch.cat((x_min, y_min, x_max, y_max), dim= 1)
-    
+
     scale_x = new_image.width / w
     scale_y = new_image.height / h
-    
+
     #Resize new image to (w, h)
     # import ipdb; ipdb.set_trace()
     new_image = new_image.resize((w, h))
-    
+
     #Resize boxes
     new_boxes /= torch.Tensor([scale_x, scale_y, scale_x, scale_y])
     new_boxes[:, 0] = torch.clamp(new_boxes[:, 0], 0, w)
@@ -201,7 +201,7 @@ class RandomCropDebug:
 
 
         return img, target
-        
+
 class RandomSelectMulti(object):
     """
     Randomly selects between transforms1 and transforms2,
@@ -217,22 +217,22 @@ class RandomSelectMulti(object):
 
 
 class Albumentations:
-    def __init__(self):
+    def __init__(self, args):
         import albumentations as A
         self.transform = A.Compose([
+            A.HueSaturationValue(hue_shift_limit=1, sat_shift_limit=1, val_shift_limit=1, p=1.0),
             # A.Blur(p=0.01),
             # A.RGBShift(p=0.1),
-            A.MedianBlur(p=0.2),
+            # A.MedianBlur()
             # A.Sharpen(p=0.2),
             # A.FancyPCA(alpha=0.5, p=0.2),
-            A.GaussNoise(var_limit=(0.25, 25), p=0.2),
+            A.GaussNoise(var_limit=(0.25, 25), p=args.gause_noise_p),
             # A.ToGray(p=0.1),
             # A.CLAHE(p=0.1),
-            # A.RandomBrightnessContrast(p=0.1),
-            # A.RandomGamma(p=0.3),
+            A.RandomBrightnessContrast(brightness_limit=args.brightness_limit, contrast_limit=args.contrast_limit),
+            A.RandomGamma(gamma_limit=(args.gamma_limit_min, args.gamma_limit_max), p=args.random_gamma_p),
             # A.Equalize(p=0.3),
-            A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=5, val_shift_limit=5, p=1.0),
-            # A.ImageCompression(quality_lower=75, p=0.005),
+            A.ImageCompression(quality_lower=args.quality_lower, p=args.image_compression_p),
             ],
             bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.1, label_fields=['class_labels']),
         )
