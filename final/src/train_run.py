@@ -159,7 +159,7 @@ np.random.seed(seed)
 random.seed(seed)
 g = torch.Generator()
 g.manual_seed(0)
-torch.use_deterministic_algorithms(True)
+# torch.use_deterministic_algorithms(True)
 
 
 class ModelBuilder:
