@@ -21,7 +21,7 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 		'quality_lower': trial.suggest_float('quality_lower', 65, 85, step=10),
 		'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
 
-		'epochs': 1, #poch limit
+		'epochs': 2, #poch limit
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
 	}
 
