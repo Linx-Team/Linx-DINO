@@ -13,7 +13,7 @@ batch_size = 2
 weight_decay = 0.0001
 epochs = 12
 lr_drop = 11
-save_checkpoint_interval = 1
+save_checkpoint_interval = 100
 clip_max_norm = 0.1
 onecyclelr = False
 multi_step_lr = False
@@ -112,3 +112,12 @@ ema_epoch = 0
 
 use_detached_boxes_dec_out = False
 
+#albumentation
+gause_noise_p = 0.1
+brightness_limit = 0.0
+contrast_limit = 0.2
+gamma_limit_min = 80.0
+gamma_limit_max = 110.0
+random_gamma_p = 0.5
+quality_lower = 85.0
+image_compression_p = 0.3
