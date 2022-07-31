@@ -3,7 +3,7 @@ import os
 from typing import Dict
 
 import optuna
-import torch
+
 from train_run import LinxModelBuilder, ADDED_PARAMS
 
 BASE_METRIC_KEY = 'best_res'
@@ -22,8 +22,8 @@ def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 		# 'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
 		'focal_alpha': trial.suggest_float('focal_alpha', 0.1, 0.4, step=0.05),
 		'focal_gamma': trial.suggest_float('focal_gamma', 1.0, 2.0, step=0.5),
-		'dn_label_noise_ratio': trial.suggest_float('dn_label_noise_ratio',0.1, 0.6, step=0.1),
-		'epochs': 10, #poch limit
+		'dn_label_noise_ratio': trial.suggest_float('dn_label_noise_ratio', 0.1, 0.6, step=0.1),
+		'epochs': 10,  # poch limit
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
 	}
 
@@ -47,7 +47,10 @@ if __name__ == '__main__':
 		study = optuna.create_study(direction='maximize', study_name='param_finder')
 		process_number = 0
 		study.optimize(lambda trial: objective(trial, PARAMS, process_number=process_number), n_trials=100)
+
+		logger = logging.getLogger('linx')
 		logger.info(f'best trial AP50 score : {study.best_trial.value}, which params : {study.best_trial.params}')
+
 		fig = optuna.visualization.plot_optimization_history(study)
 		fig.write_image(file=f'optimization_history_{process_number}_{opt_proc_num}.png', format='png')
 		fig2 = optuna.visualization.plot_param_importances(study)
