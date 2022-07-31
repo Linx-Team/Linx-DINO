@@ -12,15 +12,17 @@ opt_proc_num = os.environ.get('OPT_PROC_NUM', 0)
 
 def objective(trial: optuna.Trial, DEFAULT_CONFIGS: Dict, process_number=0):
 	opt_params = {
-		'gause_noise_p': trial.suggest_float('gause_noise_p', 0, 0.5, step=0.1),
-		'brightness_limit': trial.suggest_float('brightness_limit', 0, 0.5, step=0.1),
-		'contrast_limit': trial.suggest_float('contrast_limit', 0, 0.5, step=0.1),
-		'gamma_limit_min': trial.suggest_float('gamma_limit_min', 80, 100, step=10),
-		'gamma_limit_max': trial.suggest_float('gamma_limit_max', 100, 120, step=10),
-		'random_gamma_p': trial.suggest_float('random_gamma_p', 0, 0.5, step=0.1),
-		'quality_lower': trial.suggest_float('quality_lower', 65, 85, step=10),
-		'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
-
+		# 'gause_noise_p': trial.suggest_float('gause_noise_p', 0, 0.5, step=0.1),
+		# 'brightness_limit': trial.suggest_float('brightness_limit', 0, 0.5, step=0.1),
+		# 'contrast_limit': trial.suggest_float('contrast_limit', 0, 0.5, step=0.1),
+		# 'gamma_limit_min': trial.suggest_float('gamma_limit_min', 80, 100, step=10),
+		# 'gamma_limit_max': trial.suggest_float('gamma_limit_max', 100, 120, step=10),
+		# 'random_gamma_p': trial.suggest_float('random_gamma_p', 0, 0.5, step=0.1),
+		# 'quality_lower': trial.suggest_float('quality_lower', 65, 85, step=10),
+		# 'image_compression_p': trial.suggest_float('image_compression_p', 0, 0.5, step=0.1),
+		'focal_alpha': trial.suggest_float('focal_alpha', 0.1, 0.4, step=0.05),
+		'focal_gamma': trial.suggest_float('focal_gamma', 1.0, 2.0, step=0.5),
+		'dn_label_noise_ratio': trial.suggest_float('dn_label_noise_ratio',0.1, 0.6, step=0.1),
 		'epochs': 10, #poch limit
 		'output_dir': DEFAULT_CONFIGS['output_dir'] + f'_{process_number}_opt_{trial.number}',
 	}
