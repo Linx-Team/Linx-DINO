@@ -704,7 +704,7 @@ def build(image_set, args):
     root = Path(args.dataset_path)
     # assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
-    if args.dtaset_file == 'coco':
+    if args.dataset_file == 'coco':
         PATHS = {
             "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
             "train_reg": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
