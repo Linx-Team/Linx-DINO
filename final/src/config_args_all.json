@@ -173,5 +173,14 @@
   "dn_bbox_coef": 1.0,
   "backbone_dir": "/home/ubuntu/.linx/backbones/swin/",
   "config_file": "config_args_all.json",
-  "print_freq": 200
+  "print_freq": 200,
+
+  "gause_noise_p": 0.1,
+  "brightness_limit": 0.0,
+  "contrast_limit": 0.2,
+  "gamma_limit_min": 80.0,
+  "gamma_limit_max": 110.0,
+  "random_gamma_p": 0.5,
+  "quality_lower": 85.0,
+  "image_compression_p": 0.3
 }
