@@ -64,8 +64,8 @@ class LinxModelBuilder(object):
 				cfg.dump(save_cfg_path)
 				save_json_path = os.path.join(args.output_dir, "config_args_raw.json")
 				with open(save_json_path, 'w') as f:
-					json.dump(vars(args), f, indent=2)
-			cfg_dict = cfg._cfg_dict.to_dict()
+					json.dump(cfg.config_dict, f, indent=2)
+			cfg_dict = cfg.config_dict
 			args_vars = vars(args)
 			for k, v in cfg_dict.items():
 				if k not in args_vars:
