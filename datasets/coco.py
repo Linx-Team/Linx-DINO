@@ -488,9 +488,7 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
 
     normalize = T.Compose([
         T.ToTensor(),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) #Imagenet mean std
-        # T.Normalize([0.5075, 0.5191, 0.5054], [0.2232, 0.2238, 0.2394]),# Linx data mean std
-        # T.Normalize([2.3053, 0.1703, 0.5513], [1.3169, 0.1262, 0.2333]) #HSV mean std
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
     # config the params for data aug
@@ -621,7 +619,7 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
                     T.RandomResize(scales, max_size=max_size),
                 ])
             ),
-            SLT.Albumentations(),
+            SLT.Albumentations(args),
             normalize,
         ])
 
@@ -703,23 +701,25 @@ def get_aux_target_hacks_list(image_set, args):
 
 
 def build(image_set, args):
-    root = Path(args.coco_path)
+    root = Path(args.dataset_path)
     # assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
-    # PATHS = {
-    #     "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-    #     "train_reg": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-    #     "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-    #     "eval_debug": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-    #     "test": (root / "test2017", root / "annotations" / 'image_info_test-dev2017.json' ),
-    # }
-    PATHS = {
-        "train": (root / "train", root / "annotations" / f'{mode}_train.json'),
-        "train_reg": (root / "train", root / "annotations" / f'{mode}_train.json'),
-        "val": (root / "val", root / "annotations" / f'{mode}_val.json'),
-        "eval_debug": (root / "val", root / "annotations" / f'{mode}_val.json'),
-        # "test": (root / "test", root / "annotations" / 'image_info_test-dev.json'),
-    }
+    if root == 'coco':
+        PATHS = {
+            "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
+            "train_reg": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
+            "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
+            "eval_debug": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
+            "test": (root / "test2017", root / "annotations" / 'image_info_test-dev2017.json' ),
+        }
+    else:
+        PATHS = {
+            "train": (root / "train", root / "annotations" / f'{mode}_train.json'),
+            "train_reg": (root / "train", root / "annotations" / f'{mode}_train.json'),
+            "val": (root / "val", root / "annotations" / f'{mode}_val.json'),
+            "eval_debug": (root / "val", root / "annotations" / f'{mode}_val.json'),
+            # "test": (root / "test", root / "annotations" / 'image_info_test-dev.json'),
+        }
 
     # add some hooks to datasets
     aux_target_hacks_list = get_aux_target_hacks_list(image_set, args)
@@ -729,11 +729,8 @@ def build(image_set, args):
     if os.environ.get('DATA_COPY_SHILONG') == 'INFO':
         preparing_dataset(dict(img_folder=img_folder, ann_file=ann_file), image_set, args)
 
-    try:
-        strong_aug = args.strong_aug
-    except:
-        strong_aug = False
-    dataset = CocoDetection(img_folder, ann_file, 
+    strong_aug = getattr(args, 'strong_aug', False)
+    dataset = CocoDetection(img_folder, ann_file,
             transforms=make_coco_transforms(image_set, fix_size=args.fix_size, strong_aug=strong_aug, args=args), 
             return_masks=args.masks,
             aux_target_hacks=aux_target_hacks_list,
